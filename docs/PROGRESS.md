@@ -174,3 +174,93 @@
   file alone can look small until checkpointed; reading the database back, as the
   integration tests do, is unaffected), and stayed open without the premature-shutdown
   bug above.
+
+## M3 — Desktop shell (done)
+
+**Built:**
+- `src/Folio.Application/Authentication/`: `IAuthenticationService`/`AuthenticationService`
+  (SPEC §2.1 login: lockout checked before the password, same `InvalidCredentials`
+  reason whether the username doesn't exist or the password is wrong, never returns
+  the full `User` entity), `AuthenticationResult`. `Abstractions/ICurrentUserSession.cs`
+  (write side of the session; `ICurrentUserService` stays read-only).
+- `src/Folio.Infrastructure/`: `Common/FolioPaths.cs` (centralizes every
+  `%LOCALAPPDATA%\Folivora\Folio\` path), `Auditing/CurrentUserSession.cs`,
+  `Hosting/DatabaseInitializerHostedService.cs`, `DependencyInjection/ServiceCollectionExtensions.cs`
+  (`AddFolioInfrastructure`). Every repository switched from a direct `FolioDbContext`
+  to `IDbContextFactory<FolioDbContext>` (ADR-0007); `IUserRepository` gained
+  `UpdateAsync`; the now-unused `IUnitOfWork` was removed.
+- `src/Folio.Desktop/`: Generic Host composition root (`App.xaml.cs`), bootstrap +
+  Host-managed Serilog, `ErrorHandling/GlobalExceptionHandler.cs`, `SplashWindow`,
+  `Theming/` (`IThemeService`/`ThemeService`, persisted preference), `Navigation/`
+  (`INavigationService`/`NavigationService`, ViewModel-first), `Messages/`
+  (`UserSignedInMessage`, `UserSignedOutMessage`), `ViewModels/` (`ShellCoordinatorViewModel`,
+  `LoginViewModel`, `ShellViewModel`, `WelcomeViewModel`), matching `Views/`,
+  `Resources/Strings.resx` (+ a hand-written accessor), `Resources/Theme/Folio.Light.xaml`
+  / `Folio.Dark.xaml` (the "Bosque" palette), `MainWindow` (a `FluentWindow`).
+- `tests/Folio.Application.Tests/Authentication/AuthenticationServiceTests.cs`: 7 tests
+  (missing user, wrong password increments attempts, 5th attempt locks, already-locked
+  skips the password check entirely, inactive account, successful login resets
+  attempts and signs in, missing-user vs wrong-password return the same reason).
+- `tests/Folio.Desktop.Tests/` (new project, targets `net10.0-windows` since it
+  references `Folio.Desktop`): 6 `LoginViewModel` tests (error messages per failure
+  reason, `UserSignedInMessage` sent on success — captured via a real
+  `WeakReferenceMessenger`, not a mock, since `IMessenger.Send<T>` resolves through a
+  generic extension method that's awkward to verify with NSubstitute — and the
+  password field cleared after every attempt, success or failure).
+- `Folio.sln` reordered: `Folio.Desktop` is now the first project, so Visual Studio
+  picks it as the default startup project on a fresh clone.
+- ADR-0007 (Generic Host + `IDbContextFactory`), ADR-0008 (theme system).
+
+**Key design decisions:**
+- **Splash → Login → Shell, one window.** `MainWindow` never changes; its content
+  switches between `LoginViewModel` and `ShellViewModel` through
+  `ShellCoordinatorViewModel`, which listens for `UserSignedInMessage`/
+  `UserSignedOutMessage` on `CommunityToolkit.Mvvm`'s `IMessenger` — Login and Shell
+  never reference each other directly. A separate `SplashWindow` (plain colors, no
+  theme dependency) covers the Host's startup/migration/seed, closed right before
+  `MainWindow` is shown.
+- **`ShutdownMode.OnExplicitShutdown` during startup.** With no `StartupUri`, WPF
+  briefly has zero windows open while the Host starts; its default `OnLastWindowClose`
+  mode would (and, once, did) shut the app down before anything ever appeared. Fixed by
+  switching to `OnExplicitShutdown` until `MainWindow.Show()`, then back to
+  `OnLastWindowClose` so closing the window still exits normally.
+- **Login never stores the password longer than one attempt.** `LoginViewModel` clears
+  `Password` in a `finally` block — success or failure — and nothing in
+  `AuthenticationService` or `LoginViewModel` ever logs it. Credential verification is
+  always via `IPasswordHasher`; the lockout check happens *before* that call, so a
+  locked account never even reaches password comparison (and a test asserts
+  `IPasswordHasher.Verify` was never called in that case).
+- **Side navigation without WPF-UI's `NavigationView` Frame.** `ShellView` uses a
+  plain two-column layout (a styled side panel + a `ContentControl`) rather than
+  wiring WPF-UI's own `NavigationView`/Frame navigation, to avoid coupling the
+  ViewModel-first ViewModel/DataTemplate pattern (SPEC §4) to a second, competing
+  navigation system. `INavigationService` is Folio's own, resolving ViewModels from DI;
+  WPF-UI is used for styled controls (`FluentWindow`, `Button`, `PasswordBox`,
+  `TitleBar`) but not for page navigation itself.
+- **Theme and brand palette change together — ADR-0008.** `IThemeService.ApplyTheme`
+  calls WPF-UI's `ApplicationThemeManager.Apply` and swaps the Folio brand
+  `ResourceDictionary` in the same method, so they can't drift out of sync. Startup
+  theme: saved preference, else the system theme; only an explicit toggle persists.
+
+**Known limitations / deferred on purpose:**
+- `UserRepository.UpdateAsync` re-attaches a detached `User` as `Modified`, so the
+  audit log records every column, not just the ones that actually changed (ADR-0007).
+  `PasswordHash`/`Salt` are still redacted regardless.
+- The side navigation has exactly one page (`WelcomeViewModel`, a placeholder greeting)
+  — real feature pages start in M4.
+- The UI could not be visually inspected pixel-by-pixel in this environment (no
+  desktop screenshot tool available here); verification relied on the full automated
+  test suite (134 tests), the Serilog log confirming a clean Host startup with no
+  errors, and the process staying open and responsive after login/shell/logout code
+  paths were exercised by the test suite. Jeimy should give the login screen, the
+  theme toggle, and sign-out a manual look before considering M3 fully signed off.
+- High-contrast Windows themes fall back to the light palette (ADR-0008) — not
+  distinguished from regular light/dark.
+
+**Verification:**
+- `dotnet build Folio.sln -warnaserror` → 0 warnings, 0 errors.
+- `dotnet test Folio.sln` → 106 Domain + 7 Application + 15 Infrastructure + 6 Desktop
+  = 134 tests pass.
+- App launched end-to-end against the real seeded database: Generic Host started
+  cleanly (Serilog log shows no errors), splash screen closed, and the process stayed
+  open and responsive.
