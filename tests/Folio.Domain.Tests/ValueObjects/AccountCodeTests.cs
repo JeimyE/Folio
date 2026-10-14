@@ -65,4 +65,43 @@ public class AccountCodeTests
 
         child.IsChildOf(unrelated).Should().BeFalse();
     }
+
+    [Fact]
+    public void CompareTo_DoubleDigitSegment_SortsAfterSingleDigitSegment_NotAlphabetically()
+    {
+        // A plain string compare would put "1.1.10" before "1.1.2" (since '1' < '2'
+        // as characters). The numeric, segment-wise compare must not do that.
+        var two = new AccountCode("1.1.2");
+        var ten = new AccountCode("1.1.10");
+
+        two.CompareTo(ten).Should().BeNegative();
+        ten.CompareTo(two).Should().BePositive();
+    }
+
+    [Fact]
+    public void CompareTo_ParentBeforeOwnChild_WhenSharedSegmentsAreEqual()
+    {
+        var parent = new AccountCode("1.1");
+        var child = new AccountCode("1.1.01");
+
+        parent.CompareTo(child).Should().BeNegative();
+    }
+
+    [Fact]
+    public void CompareTo_EqualCodes_ReturnsZero()
+    {
+        new AccountCode("1.1.01").CompareTo(new AccountCode("1.1.01")).Should().Be(0);
+    }
+
+    [Fact]
+    public void Sort_MixOfSingleAndDoubleDigitSegments_OrdersNumerically()
+    {
+        string[] unordered = ["1.1.10", "1.1.2", "1.2", "1.1.1", "1"];
+        var codes = unordered
+            .Select(c => new AccountCode(c))
+            .OrderBy(c => c)
+            .Select(c => c.Value);
+
+        codes.Should().ContainInOrder("1", "1.1.1", "1.1.2", "1.1.10", "1.2");
+    }
 }

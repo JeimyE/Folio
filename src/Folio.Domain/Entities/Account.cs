@@ -118,4 +118,16 @@ public sealed class Account
     }
 
     public void UpdateDescription(string? description) => Description = description;
+
+    /// <summary>
+    /// Changes the account's type (and, optionally, overrides its normal balance).
+    /// SPEC §2.3: this must never be called once the account has movements — the
+    /// Domain has no repository to check that itself, so the Application layer is
+    /// responsible for that guard before calling this.
+    /// </summary>
+    public void ChangeType(AccountType type, NormalBalance? normalBalanceOverride = null)
+    {
+        Type = type;
+        NormalBalance = normalBalanceOverride ?? DeriveNormalBalance(type);
+    }
 }

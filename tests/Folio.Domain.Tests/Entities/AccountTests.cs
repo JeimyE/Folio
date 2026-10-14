@@ -103,4 +103,25 @@ public class AccountTests
 
         account.IsActive.Should().BeFalse();
     }
+
+    [Fact]
+    public void ChangeType_NoOverride_DerivesNormalBalanceFromNewType()
+    {
+        var account = new Account(new AccountCode("4.1"), "Ventas", AccountType.Revenue, isPostable: true);
+
+        account.ChangeType(AccountType.Liability);
+
+        account.Type.Should().Be(AccountType.Liability);
+        account.NormalBalance.Should().Be(NormalBalance.Credit);
+    }
+
+    [Fact]
+    public void ChangeType_WithOverride_UsesOverride()
+    {
+        var account = new Account(new AccountCode("1.2.04"), "Depreciación acumulada", AccountType.Asset, isPostable: true);
+
+        account.ChangeType(AccountType.Asset, NormalBalance.Credit);
+
+        account.NormalBalance.Should().Be(NormalBalance.Credit);
+    }
 }
