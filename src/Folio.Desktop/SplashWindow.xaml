@@ -1,0 +1,29 @@
+<Window x:Class="Folio.Desktop.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Folio"
+        Width="360" Height="220"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="#F7F3EA">
+    <Border BorderBrush="#3F6B4A" BorderThickness="1">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Folio"
+                       FontSize="40" FontWeight="Bold"
+                       Foreground="#3F6B4A"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="by Folivora Software"
+                       FontSize="13"
+                       Foreground="#2B2A27"
+                       Margin="0,4,0,24"
+                       HorizontalAlignment="Center"/>
+            <ProgressBar IsIndeterminate="True"
+                         Width="180" Height="4"
+                         Foreground="#8B5E3C"
+                         Background="#FFFFFF"
+                         BorderThickness="0"/>
+        </StackPanel>
+    </Border>
+</Window>

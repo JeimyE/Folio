@@ -16,6 +16,8 @@
     <PackageReference Include="WPF-UI" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.File" />
     <!-- Required by the "dotnet ef migrations add" startup-project tooling, even though
          Folio.Desktop never calls EF Core design-time APIs itself. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
