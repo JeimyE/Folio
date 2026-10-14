@@ -1,0 +1,21 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Folio brand palette ("Bosque") — dark variant. Same resource keys as
+         Folio.Light.xaml, so swapping which dictionary is merged is enough to
+         retheme every view that references them. -->
+    <Color x:Key="FolioPrimaryColor">#7FA57A</Color>
+    <Color x:Key="FolioAccentColor">#C49A6C</Color>
+    <Color x:Key="FolioBackgroundColor">#1C211D</Color>
+    <Color x:Key="FolioSurfaceColor">#252B26</Color>
+    <Color x:Key="FolioTextColor">#ECE8DF</Color>
+    <Color x:Key="FolioErrorColor">#E07A6B</Color>
+
+    <SolidColorBrush x:Key="FolioPrimaryBrush" Color="{StaticResource FolioPrimaryColor}" />
+    <SolidColorBrush x:Key="FolioAccentBrush" Color="{StaticResource FolioAccentColor}" />
+    <SolidColorBrush x:Key="FolioBackgroundBrush" Color="{StaticResource FolioBackgroundColor}" />
+    <SolidColorBrush x:Key="FolioSurfaceBrush" Color="{StaticResource FolioSurfaceColor}" />
+    <SolidColorBrush x:Key="FolioTextBrush" Color="{StaticResource FolioTextColor}" />
+    <SolidColorBrush x:Key="FolioErrorBrush" Color="{StaticResource FolioErrorColor}" />
+
+</ResourceDictionary>
