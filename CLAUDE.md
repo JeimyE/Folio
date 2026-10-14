@@ -19,14 +19,14 @@ dotnet ef migrations add <Name> --project src/Folio.Infrastructure --startup-pro
 
 1. **One milestone at a time** (SPEC §6). Never start the next milestone without being asked.
 2. Before writing code for a milestone, post a short plan (files to create, key decisions) and then proceed.
-3. **Commit in small logical steps** using Conventional Commits (`feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`, `ci:`). Each commit must build.
-4. **Do not push.** Jeimy reviews the changes in GitHub Desktop and pushes them herself.
-5. When a milestone is done:
+3. **Never run `git commit` or `git push`.** Leave all changes uncommitted. Jeimy commits and pushes herself from GitHub Desktop.
+4. When a milestone is done:
    - Build with `-warnaserror` and run all tests. Fix everything before reporting.
    - Update `docs/PROGRESS.md` (milestone status, what was built, known limitations).
    - Write an ADR in `docs/adr/` for each significant decision (format: Context, Decision, Consequences).
    - Finish with a **summary in Spanish** for Jeimy: what was built, the files that matter most, the key concepts to understand (explained simply), and 3 interview questions she could be asked about this milestone, with short answers.
-6. If something in the spec is ambiguous or seems wrong, ask instead of guessing. Do not add packages that are not in SPEC §4 without asking.
+   - Add a **"Commits sugeridos"** section: a list of commits in Conventional Commits format (`feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`, `ci:`), each with its exact message and the exact files it should include, in the order they should be made.
+5. If something in the spec is ambiguous or seems wrong, ask instead of guessing. Do not add packages that are not in SPEC §4 without asking.
 
 ## Code rules
 
