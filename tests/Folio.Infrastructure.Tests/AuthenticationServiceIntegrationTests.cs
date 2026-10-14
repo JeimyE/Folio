@@ -67,12 +67,4 @@ public sealed class AuthenticationServiceIntegrationTests : IDisposable
 
         result.Succeeded.Should().BeTrue();
     }
-
-    private sealed class TestDbContextFactory(SqliteInMemoryContextFactory factory) : IDbContextFactory<FolioDbContext>
-    {
-        public FolioDbContext CreateDbContext() => factory.CreateContext();
-
-        public Task<FolioDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(factory.CreateContext());
-    }
 }
