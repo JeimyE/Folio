@@ -26,6 +26,8 @@ dotnet ef migrations add <Name> --project src/Folio.Infrastructure --startup-pro
    - Write an ADR in `docs/adr/` for each significant decision (format: Context, Decision, Consequences).
    - Finish with a **summary in Spanish** for Jeimy: what was built, the files that matter most, the key concepts to understand (explained simply), and 3 interview questions she could be asked about this milestone, with short answers.
    - Add a **"Commits sugeridos"** section: a list of commits in Conventional Commits format (`feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`, `ci:`), each with its exact message and the exact files it should include, in the order they should be made.
+     - Always write each file/folder's **full path from the repo root** (e.g. `src/Folio.Infrastructure/DependencyInjection/ServiceCollectionExtensions.cs`), never just a bare name (never `ServiceCollectionExtensions.cs` or `DependencyInjection/`) — multiple projects in this solution have same-named files/folders (e.g. `DependencyInjection/`, `Repositories/`), so a bare name is ambiguous.
+     - If a commit's files include a name that also exists elsewhere in the repo under a different path, add a short parenthetical warning on that line noting the other location(s), so Jeimy can double-check she's staging the right one in GitHub Desktop.
 5. If something in the spec is ambiguous or seems wrong, ask instead of guessing. Do not add packages that are not in SPEC §4 without asking.
 
 ## Code rules
