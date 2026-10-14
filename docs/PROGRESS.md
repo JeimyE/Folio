@@ -264,3 +264,104 @@
 - App launched end-to-end against the real seeded database: Generic Host started
   cleanly (Serilog log shows no errors), splash screen closed, and the process stayed
   open and responsive.
+
+## M4 — Chart of accounts (done)
+
+**Built:**
+- `src/Folio.Domain/ValueObjects/AccountCode.cs`: now `IComparable<AccountCode>`
+  (`<`/`<=`/`>`/`>=` too, for `CA1036`), ordering by numeric segment, not string
+  comparison — `1.1.2` sorts before `1.1.10` (ADR-0009).
+- `src/Folio.Domain/Entities/Account.cs`: `ChangeType(AccountType, NormalBalance?)` —
+  M1 had no way to change an account's type/normal balance after construction.
+- `src/Folio.Application/Abstractions/Repositories/IAccountRepository.cs` /
+  `src/Folio.Infrastructure/Persistence/Repositories/AccountRepository.cs`: added
+  `CodeExistsAsync`, `HasMovementsAsync` (posted lines only), `GetMovementTotalsAsync`
+  (one SQL `SUM()` over cents for a set of account ids — ADR-0010), `UpdateAsync`,
+  `DeleteAsync`.
+- `src/Folio.Application/ChartOfAccounts/`: `AccountTreeItemDto`, `AccountDetailDto`,
+  `CreateAccountRequest`/`UpdateAccountRequest`, `ChartOfAccountsResult`,
+  `IChartOfAccountsService`/`ChartOfAccountsService` — every chart-of-accounts use
+  case (get tree, get detail with balance, create, update, activate/deactivate,
+  delete), with every validation rule from SPEC §2.3 enforced here, in Spanish error
+  messages the ViewModel only ever displays verbatim.
+- `src/Folio.Desktop/ViewModels/`: `AccountTreeNodeViewModel` (wraps a tree DTO with
+  `IsExpanded`/`IsSearchMatch`/`IsVisible` for the search feature),
+  `AccountFormViewModel` (create/edit form, owns the save call and its error),
+  `ChartOfAccountsViewModel` (tree + search + detail + every command). `ShellViewModel`
+  gained navigation commands to the welcome page and this new one.
+- `src/Folio.Desktop/Dialogs/`: `IDialogService`/`DialogService` — modal account
+  form and delete confirmation via WPF-UI's `ContentDialog` (ADR-0011).
+- `src/Folio.Desktop/Views/`: `ChartOfAccountsView.xaml` (search box, toolbar, a
+  native `TreeView` with a `HierarchicalDataTemplate`, and a detail panel) and
+  `AccountFormView.xaml`; two side-navigation buttons added to `ShellView.xaml`
+  ("Inicio"/"Catálogo de cuentas"); `MainWindow.xaml` wraps its content in a
+  `ui:ContentDialogHost` so dialogs have somewhere to attach to.
+- `src/Folio.Desktop/Converters/`: `NullToVisibilityConverter`,
+  `AccountTypeDisplayConverter`, `NormalBalanceDisplayConverter` (the enums' own names
+  are English identifiers; these render the es-CR label the user sees).
+- `tests/Folio.Application.Tests/ChartOfAccounts/ChartOfAccountsServiceTests.cs`: 20
+  tests covering every validation path (duplicate code, missing/postable/type-mismatched
+  parent, movements blocking type/normal-balance/postable changes, hierarchy rules for
+  activate/deactivate, delete blocked by children or movements).
+- `tests/Folio.Infrastructure.Tests/ChartOfAccountsBalanceIntegrationTests.cs`: posts
+  real journal entries (including an internal transfer between sibling leaves) through
+  a real seeded SQLite database and asserts leaf and group balances net correctly via
+  `ChartOfAccountsService` end to end — not a mock anywhere in the chain.
+- `tests/Folio.Desktop.Tests/ViewModels/ChartOfAccountsViewModelTests.cs`: 14 tests —
+  tree loading, search matching by code/name case-insensitively, ancestor-path
+  preservation and auto-expand on a descendant match, unrelated branches staying
+  hidden, detail loading on selection, command `CanExecute` gating on selection, and
+  the add/delete command flows (dialog cancelled vs. confirmed, service failure
+  surfaced as `ErrorMessage`).
+- ADR-0009 (code defines hierarchy, immutable), ADR-0010 (balances computed on
+  demand via SQL aggregation), ADR-0011 (`ContentDialog` manual close after async
+  save).
+
+**Key design decisions:**
+- **The dotted code is the only parent picker — ADR-0009.** Creating `1.1.07` always
+  means "child of `1.1`"; there is no separate parent dropdown that could disagree
+  with the typed code. Code and parent are immutable after creation —
+  `UpdateAccountRequest` has no `Code` field at all.
+- **Balances are never stored — ADR-0010.** Every detail-panel open runs a real SQL
+  `SUM()` over the account's (or, for a group, every descendant leaf's) posted
+  movements, signed by `NormalBalance`. Nothing to keep in sync, nothing that can
+  drift from the ledger.
+- **Hierarchy rules for activate/deactivate.** `DeactivateAsync` refuses to deactivate
+  an account with any still-active child ("Desactive primero las subcuentas.");
+  `ActivateAsync` refuses to activate an account whose parent is inactive. Both are
+  enforced in the Application layer (needs the whole tree/parent lookup, which the
+  Domain's `Account` alone cannot do), not duplicated in the ViewModel.
+- **`ContentDialog` closes itself after validating, not on click — ADR-0011.** WPF-UI's
+  `Closing` event has no async deferral; the dialog always cancels its own close on
+  the Primary button, awaits the save, and only then closes itself if it succeeded,
+  leaving the error visible inline otherwise.
+- **Search expands ancestors without marking them as matches.** `AccountTreeNodeViewModel.ApplyFilter`
+  recurses depth-first; a node is visible if it matches or any descendant does, but
+  `IsSearchMatch` (the highlight) is only ever true for the node whose own code or
+  name actually matched — the groups above it light up as "reachable," not as hits.
+
+**Known limitations / deferred on purpose:**
+- No autocomplete/suggestion for the next free sibling code when creating an account
+  (ADR-0009) — the user types the full code, same as working from a printed chart of
+  accounts.
+- Renumbering/moving an existing account is out of scope; the only supported path for
+  a misclassified account is deactivating it and creating a new one with the correct
+  code.
+- The account form's client-side validation is deliberately thin (only "name is
+  required"); every other rule is server-side in `ChartOfAccountsService` and surfaces
+  through the same `ErrorMessage` the dialog shows, to avoid duplicating business
+  rules in the ViewModel.
+- As with M3, the UI could not be visually inspected pixel-by-pixel in this
+  environment — verification relied on the full automated test suite, the Serilog log
+  confirming a clean run, and the process launching and staying open and responsive
+  with the new "Catálogo de cuentas" screen reachable from the sidebar. Jeimy should
+  give the tree, search, and the create/edit/delete dialogs a manual look before
+  considering M4 fully signed off.
+
+**Verification:**
+- `dotnet build Folio.sln -warnaserror` → 0 warnings, 0 errors.
+- `dotnet test Folio.sln` → 112 Domain + 27 Application + 20 Infrastructure + 20
+  Desktop = 179 tests pass.
+- App launched via `dotnet run --project src/Folio.Desktop`: Generic Host started
+  cleanly (no errors in the Serilog log), the window opened, and the process stayed
+  open and responsive; closed from this session afterward rather than left running.
