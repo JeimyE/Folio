@@ -18,6 +18,12 @@ public sealed class EntryTemplate
 
     public IReadOnlyList<EntryTemplateLine> Lines => _lines;
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private EntryTemplate()
+    {
+        Name = null!; // overwritten by EF immediately after construction
+    }
+
     public EntryTemplate(string name, string? defaultDescription = null)
     {
         if (string.IsNullOrWhiteSpace(name))

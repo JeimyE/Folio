@@ -15,6 +15,11 @@ public sealed class FiscalYear
 
     public bool IsClosed { get; private set; }
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private FiscalYear()
+    {
+    }
+
     public FiscalYear(int year, DateOnly startDate, DateOnly endDate)
     {
         if (endDate <= startDate)

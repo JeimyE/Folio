@@ -33,6 +33,16 @@ public sealed class User
 
     public DateTime CreatedAtUtc { get; }
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private User()
+    {
+        Username = null!; // overwritten by EF immediately after construction
+        FullName = null!; // overwritten by EF immediately after construction
+        Email = null!; // overwritten by EF immediately after construction
+        PasswordHash = null!; // overwritten by EF immediately after construction
+        Salt = null!; // overwritten by EF immediately after construction
+    }
+
     public User(
         string username,
         string fullName,

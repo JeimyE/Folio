@@ -7,6 +7,8 @@ namespace Folio.Domain.Entities;
 /// </summary>
 public sealed class EntryTemplateLine
 {
+    public Guid Id { get; }
+
     public Guid AccountId { get; }
 
     public bool IsDebit { get; }
@@ -22,6 +24,7 @@ public sealed class EntryTemplateLine
             throw new ArgumentOutOfRangeException(nameof(defaultAmount), defaultAmount, "Default amount must be greater than zero when provided.");
         }
 
+        Id = Guid.NewGuid();
         AccountId = accountId;
         IsDebit = isDebit;
         DefaultAmount = defaultAmount;

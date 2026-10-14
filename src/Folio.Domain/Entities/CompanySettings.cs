@@ -30,6 +30,13 @@ public sealed class CompanySettings
     /// </summary>
     public decimal VatRate { get; private set; }
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private CompanySettings()
+    {
+        Name = null!; // overwritten by EF immediately after construction
+        LegalId = null!; // overwritten by EF immediately after construction
+    }
+
     public CompanySettings(
         string name,
         string legalId,

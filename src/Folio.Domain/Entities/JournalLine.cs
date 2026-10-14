@@ -11,6 +11,8 @@ namespace Folio.Domain.Entities;
 /// </summary>
 public sealed class JournalLine
 {
+    public Guid Id { get; }
+
     /// <summary>1-based position within the entry. Assigned by <see cref="JournalEntry"/>.</summary>
     public int LineNumber { get; internal set; }
 
@@ -42,6 +44,7 @@ public sealed class JournalLine
         decimal exchangeRate,
         string? description)
     {
+        Id = Guid.NewGuid();
         AccountId = accountId;
         Debit = debit;
         Credit = credit;

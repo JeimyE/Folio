@@ -25,6 +25,11 @@ public sealed class Period
 
     public Guid? ClosedByUserId { get; private set; }
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private Period()
+    {
+    }
+
     public Period(Guid fiscalYearId, int year, int month, DateOnly startDate, DateOnly endDate)
     {
         if (endDate < startDate)

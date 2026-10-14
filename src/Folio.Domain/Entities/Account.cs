@@ -35,6 +35,15 @@ public sealed class Account
 
     public string? Description { get; private set; }
 
+    // Used by EF Core to materialize an existing row (constructor binding prefers a
+    // parameterless constructor when one exists). It skips the business constructor's
+    // validation and Id generation; EF sets every backing field directly afterward.
+    private Account()
+    {
+        Code = null!; // overwritten by EF immediately after construction
+        Name = null!; // overwritten by EF immediately after construction
+    }
+
     public Account(
         AccountCode code,
         string name,

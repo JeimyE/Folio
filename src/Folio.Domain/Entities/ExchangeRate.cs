@@ -16,6 +16,11 @@ public sealed class ExchangeRate
 
     public string? Source { get; private set; }
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private ExchangeRate()
+    {
+    }
+
     public ExchangeRate(DateOnly date, decimal buy, decimal sell, string? source = null)
     {
         if (buy <= 0)

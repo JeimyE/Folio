@@ -40,6 +40,12 @@ public sealed class JournalEntry
 
     public IReadOnlyList<JournalLine> Lines => _lines;
 
+    // Used by EF Core to materialize an existing row; see Account's private constructor.
+    private JournalEntry()
+    {
+        Description = null!; // overwritten by EF immediately after construction
+    }
+
     public JournalEntry(
         DateOnly date,
         string description,
