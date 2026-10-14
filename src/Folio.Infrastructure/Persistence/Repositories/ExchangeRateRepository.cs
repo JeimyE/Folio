@@ -4,20 +4,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence.Repositories;
 
-public sealed class ExchangeRateRepository(FolioDbContext context) : IExchangeRateRepository
+public sealed class ExchangeRateRepository(IDbContextFactory<FolioDbContext> contextFactory) : IExchangeRateRepository
 {
-    public Task<ExchangeRate?> GetByDateAsync(DateOnly rateDate, CancellationToken cancellationToken = default) =>
-        context.ExchangeRates.FirstOrDefaultAsync(r => r.Date == rateDate, cancellationToken);
-
-    public Task AddAsync(ExchangeRate rate, CancellationToken cancellationToken = default)
+    public async Task<ExchangeRate?> GetByDateAsync(DateOnly rateDate, CancellationToken cancellationToken = default)
     {
-        context.ExchangeRates.Add(rate);
-        return Task.CompletedTask;
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.ExchangeRates.FirstOrDefaultAsync(r => r.Date == rateDate, cancellationToken);
     }
 
-    public Task AddRangeAsync(IEnumerable<ExchangeRate> rates, CancellationToken cancellationToken = default)
+    public async Task AddAsync(ExchangeRate rate, CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        context.ExchangeRates.Add(rate);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddRangeAsync(IEnumerable<ExchangeRate> rates, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         context.ExchangeRates.AddRange(rates);
-        return Task.CompletedTask;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

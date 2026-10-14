@@ -4,13 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence.Repositories;
 
-public sealed class JournalEntryRepository(FolioDbContext context) : IJournalEntryRepository
+public sealed class JournalEntryRepository(IDbContextFactory<FolioDbContext> contextFactory) : IJournalEntryRepository
 {
-    public Task<JournalEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
-        context.JournalEntries.Include(e => e.Lines).FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    public async Task<JournalEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.JournalEntries.Include(e => e.Lines).FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    }
 
     public async Task<int> GetNextNumberAsync(Guid fiscalYearId, CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
         var periodIds = await context.Periods
             .Where(p => p.FiscalYearId == fiscalYearId)
             .Select(p => p.Id)
@@ -26,9 +31,10 @@ public sealed class JournalEntryRepository(FolioDbContext context) : IJournalEnt
         return (maxNumber ?? 0) + 1;
     }
 
-    public Task AddAsync(JournalEntry entry, CancellationToken cancellationToken = default)
+    public async Task AddAsync(JournalEntry entry, CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         context.JournalEntries.Add(entry);
-        return Task.CompletedTask;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

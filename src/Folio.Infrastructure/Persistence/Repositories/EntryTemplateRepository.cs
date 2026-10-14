@@ -4,14 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence.Repositories;
 
-public sealed class EntryTemplateRepository(FolioDbContext context) : IEntryTemplateRepository
+public sealed class EntryTemplateRepository(IDbContextFactory<FolioDbContext> contextFactory) : IEntryTemplateRepository
 {
-    public async Task<IReadOnlyList<EntryTemplate>> GetAllAsync(CancellationToken cancellationToken = default) =>
-        await context.EntryTemplates.Include(t => t.Lines).ToListAsync(cancellationToken);
-
-    public Task AddAsync(EntryTemplate entryTemplate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<EntryTemplate>> GetAllAsync(CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.EntryTemplates.Include(t => t.Lines).ToListAsync(cancellationToken);
+    }
+
+    public async Task AddAsync(EntryTemplate entryTemplate, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         context.EntryTemplates.Add(entryTemplate);
-        return Task.CompletedTask;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

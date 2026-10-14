@@ -4,14 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence.Repositories;
 
-public sealed class FiscalYearRepository(FolioDbContext context) : IFiscalYearRepository
+public sealed class FiscalYearRepository(IDbContextFactory<FolioDbContext> contextFactory) : IFiscalYearRepository
 {
-    public Task<FiscalYear?> GetByYearAsync(int year, CancellationToken cancellationToken = default) =>
-        context.FiscalYears.FirstOrDefaultAsync(f => f.Year == year, cancellationToken);
-
-    public Task AddAsync(FiscalYear fiscalYear, CancellationToken cancellationToken = default)
+    public async Task<FiscalYear?> GetByYearAsync(int year, CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.FiscalYears.FirstOrDefaultAsync(f => f.Year == year, cancellationToken);
+    }
+
+    public async Task AddAsync(FiscalYear fiscalYear, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         context.FiscalYears.Add(fiscalYear);
-        return Task.CompletedTask;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

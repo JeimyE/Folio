@@ -5,19 +5,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence.Repositories;
 
-public sealed class PeriodRepository(FolioDbContext context) : IPeriodRepository
+public sealed class PeriodRepository(IDbContextFactory<FolioDbContext> contextFactory) : IPeriodRepository
 {
-    public Task<Period?> GetOpenPeriodForDateAsync(DateOnly entryDate, CancellationToken cancellationToken = default) =>
-        context.Periods.FirstOrDefaultAsync(
+    public async Task<Period?> GetOpenPeriodForDateAsync(DateOnly entryDate, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.Periods.FirstOrDefaultAsync(
             p => p.Status == PeriodStatus.Open && entryDate >= p.StartDate && entryDate <= p.EndDate,
             cancellationToken);
+    }
 
-    public async Task<IReadOnlyList<Period>> GetAllForFiscalYearAsync(Guid fiscalYearId, CancellationToken cancellationToken = default) =>
-        await context.Periods.Where(p => p.FiscalYearId == fiscalYearId).OrderBy(p => p.Month).ToListAsync(cancellationToken);
-
-    public Task AddRangeAsync(IEnumerable<Period> periods, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Period>> GetAllForFiscalYearAsync(Guid fiscalYearId, CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.Periods.Where(p => p.FiscalYearId == fiscalYearId).OrderBy(p => p.Month).ToListAsync(cancellationToken);
+    }
+
+    public async Task AddRangeAsync(IEnumerable<Period> periods, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         context.Periods.AddRange(periods);
-        return Task.CompletedTask;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

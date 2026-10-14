@@ -1,11 +1,10 @@
-using Folio.Application.Abstractions;
 using Folio.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence;
 
 public sealed class FolioDbContext(DbContextOptions<FolioDbContext> options)
-    : DbContext(options), IUnitOfWork
+    : DbContext(options)
 {
     public DbSet<Account> Accounts => Set<Account>();
 

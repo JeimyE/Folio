@@ -4,14 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Folio.Infrastructure.Persistence.Repositories;
 
-public sealed class CompanySettingsRepository(FolioDbContext context) : ICompanySettingsRepository
+public sealed class CompanySettingsRepository(IDbContextFactory<FolioDbContext> contextFactory) : ICompanySettingsRepository
 {
-    public Task<CompanySettings?> GetAsync(CancellationToken cancellationToken = default) =>
-        context.CompanySettings.FirstOrDefaultAsync(cancellationToken);
-
-    public Task AddAsync(CompanySettings settings, CancellationToken cancellationToken = default)
+    public async Task<CompanySettings?> GetAsync(CancellationToken cancellationToken = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.CompanySettings.FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task AddAsync(CompanySettings settings, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         context.CompanySettings.Add(settings);
-        return Task.CompletedTask;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
