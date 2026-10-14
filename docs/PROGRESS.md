@@ -86,3 +86,91 @@
 - `dotnet build Folio.sln -warnaserror` → 0 warnings, 0 errors.
 - `dotnet test Folio.sln` → 106/106 Domain tests pass (Application/Infrastructure test
   projects still have nothing to test until M2).
+
+## M2 — Persistence and seed (done)
+
+**Built:**
+- `src/Folio.Application/Abstractions/`: `IPasswordHasher`, `ICurrentUserService`,
+  `IUnitOfWork`, and one repository interface per aggregate (`IAccountRepository`,
+  `IFiscalYearRepository`, `IPeriodRepository`, `IJournalEntryRepository`,
+  `IExchangeRateRepository`, `IUserRepository`, `ICompanySettingsRepository`,
+  `IEntryTemplateRepository`).
+- `src/Folio.Infrastructure/Persistence/`: `FolioDbContext`, one `IEntityTypeConfiguration<T>`
+  per entity, `DesignTimeDbContextFactory` (for `dotnet ef`), `FolioDbInitializer`
+  (migrate + seed-if-empty), repository implementations, and the initial migration
+  (`dotnet ef migrations add InitialCreate`, regenerated three times as mapping issues
+  surfaced — see ADR-0006).
+- `src/Folio.Infrastructure/Auditing/`: `AuditSaveChangesInterceptor` (redaction, smart
+  action labels — ADR-0004), `SystemCurrentUserService`.
+- `src/Folio.Infrastructure/Security/Pbkdf2PasswordHasher.cs`, `Common/SystemClock.cs`.
+- `src/Folio.Infrastructure/Seed/`: `ChartOfAccountsSeedData`, `ExchangeRateSeedData`,
+  `DemoEntriesSeeder`, `FolioSeeder` — the Sleepy Sloth Café & Bakery S.A. demo data.
+- `src/Folio.Desktop/App.xaml.cs`: minimal async startup (migrate + seed before showing
+  `MainWindow`) — temporary until M3's Generic Host.
+- `tests/Folio.Infrastructure.Tests/`: `SqliteInMemoryContextFactory` (real migrations,
+  not `EnsureCreated`), `FolioDbContextTests`, `AuditSaveChangesInterceptorTests`,
+  `FolioSeederTests` — 15 tests, all green.
+- ADR-0003 (money as integer cents), ADR-0004 (audit interceptor design), ADR-0005
+  (trailing 12-month seed window), ADR-0006 (explicit EF property mapping lesson).
+
+**Key design decisions:**
+- **EF mapping without touching Domain's public API.** Every entity except
+  `JournalLine`/`EntryTemplateLine` got a `private` parameterless constructor reserved
+  for EF (a comment marks it); EF's default `PropertyAccessMode.PreferFieldDuringConstruction`
+  then sets every backing field directly on load, bypassing business-constructor
+  validation and `Guid.NewGuid()` calls entirely. `JournalLine`'s existing private
+  constructor already matched this shape (pure field assignment, parameter names equal
+  to property names), so it needed no change beyond gaining its own `Id`. See ADR-0006
+  for the harder lesson: every scalar property still needs an explicit
+  `builder.Property(...)` call, or query translation fails at runtime despite compiling
+  and migrating successfully.
+- **Money as integer cents, not decimal text — ADR-0003.** `JournalLine.Debit/Credit/
+  OriginalAmount` use `MoneyToCentsConverter` so SQLite can `SUM()`/`ORDER BY` them
+  correctly (needed by M7's reports); exchange rates and VAT rate keep the provider's
+  default decimal-as-text storage, since they're never aggregated and need more than 2
+  decimal places.
+- **Automatic migration on startup.** `FolioDbInitializer.InitializeAsync(connectionString)`
+  calls `Database.MigrateAsync()` then seeds only if `Accounts` is empty.
+  `App.xaml.cs`'s `OnStartup` awaits it before ever constructing `MainWindow` — no
+  `.Result`/`.Wait()`. This required explicitly setting `ShutdownMode =
+  ShutdownMode.OnExplicitShutdown` during the await: with no `StartupUri` and zero
+  windows open yet, WPF's default `OnLastWindowClose` mode shut the app down before the
+  async initialization ever finished. Switched back to `OnLastWindowClose` right after
+  `MainWindow.Show()`.
+- **Demo seed uses a trailing 12-month window — ADR-0005.** Computed from `IClock`, not
+  a fixed calendar year, so "12 months of history, current month open" is true no
+  matter when the app is first run.
+- **Seeding never floods the audit log — ADR-0004.** `FolioDbInitializer` builds its
+  bootstrap `DbContext` without the audit interceptor at all, and writes exactly one
+  `AuditLogEntry` (`Action = "Seed"`) itself, summarizing counts.
+- **Audit interceptor redacts by property name.** `PasswordHash`/`Salt` never appear in
+  `OldValues`/`NewValues` JSON, on any entity, even when other fields on the same
+  change are legitimately logged. Status-transition detection (Draft→Posted,
+  Posted→Reversed, Open→Closed, Closed→Open) labels those rows `Post`/`Reverse`/
+  `Close`/`Reopen` instead of a generic `Update`, matching SPEC §2.9's vocabulary.
+- **Demo seed entries all go through the real `JournalEntry.Post()`** — the seeder
+  builds Drafts and posts them exactly like the real app would, so a bad amount in the
+  demo data fails loudly at first launch instead of silently corrupting the books.
+
+**Known limitations / deferred on purpose:**
+- `JournalLine`/`EntryTemplateLine` gained a `Guid Id` purely for EF's benefit (SQLite
+  cannot auto-generate the shadow key an owned collection would otherwise need) — see
+  ADR-0006. The Domain-level rule that lines have no independent identity is unchanged;
+  nothing outside persistence ever uses this id.
+- Repository implementations are intentionally minimal (CRUD + the few lookups the
+  seeder and tests needed); richer query methods arrive with their use cases in M4+.
+- `App.xaml.cs`'s startup is a stop-gap composition root (no DI, no Serilog, a bare
+  `MessageBox` on failure) — M3 replaces it with the Generic Host.
+- `dotnet-tools.json` (local tool manifest) pins `dotnet-ef` so `dotnet ef migrations
+  add` works without a global tool install.
+
+**Verification:**
+- `dotnet build Folio.sln -warnaserror` → 0 warnings, 0 errors.
+- `dotnet test Folio.sln` → 106 Domain + 15 Infrastructure tests pass (Application
+  still has nothing to test).
+- App launched via `dotnet run --project src/Folio.Desktop` against a clean
+  `%LOCALAPPDATA%` end-to-end: migrated, seeded (confirmed via the SQLite WAL file
+  size — EF Core's SQLite provider defaults to WAL journal mode, so the main `.db`
+  file alone can look small until checkpointed; reading the database back, as the
+  integration tests do, is unaffected), and stayed open without the premature-shutdown
+  bug above.
