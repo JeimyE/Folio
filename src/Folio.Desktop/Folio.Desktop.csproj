@@ -16,6 +16,12 @@
     <PackageReference Include="WPF-UI" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <!-- Required by the "dotnet ef migrations add" startup-project tooling, even though
+         Folio.Desktop never calls EF Core design-time APIs itself. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
