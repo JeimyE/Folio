@@ -2,7 +2,18 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:res="clr-namespace:Folio.Desktop.Resources">
+             xmlns:res="clr-namespace:Folio.Desktop.Resources"
+             xmlns:vm="clr-namespace:Folio.Desktop.ViewModels">
+    <UserControl.Resources>
+        <!-- Shared by both nav buttons below: Transparent at rest, filled with the
+             Bosque primary color (and surface-colored text, for contrast) while its
+             page is the one currently shown. -->
+        <Style x:Key="NavButtonStyle" TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+            <Setter Property="Appearance" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+    </UserControl.Resources>
     <Grid Background="{DynamicResource FolioBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220" />
@@ -36,7 +47,37 @@
                                Margin="0,4,0,0" />
                 </StackPanel>
 
-                <!-- Grid.Row="1" is the spacer: navigation items land here from M4 on. -->
+                <StackPanel Grid.Row="1" Margin="0,24,0,0">
+                    <ui:Button Content="{x:Static res:Strings.NavWelcome}"
+                               Icon="{ui:SymbolIcon Home24}"
+                               Command="{Binding NavigateToWelcomeCommand}"
+                               Margin="0,0,0,4">
+                        <ui:Button.Style>
+                            <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource NavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CurrentPage}" Value="{x:Static vm:ShellPage.Welcome}">
+                                        <Setter Property="Background" Value="{DynamicResource FolioPrimaryBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioSurfaceBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+                    <ui:Button Content="{x:Static res:Strings.NavChartOfAccounts}"
+                               Icon="{ui:SymbolIcon Folder24}"
+                               Command="{Binding NavigateToChartOfAccountsCommand}">
+                        <ui:Button.Style>
+                            <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource NavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CurrentPage}" Value="{x:Static vm:ShellPage.ChartOfAccounts}">
+                                        <Setter Property="Background" Value="{DynamicResource FolioPrimaryBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioSurfaceBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+                </StackPanel>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Bottom">
                     <ui:Button Icon="{ui:SymbolIcon WeatherSunny24}"

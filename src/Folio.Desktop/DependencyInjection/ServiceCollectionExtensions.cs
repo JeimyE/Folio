@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using Folio.Desktop.Dialogs;
 using Folio.Desktop.Navigation;
 using Folio.Desktop.Theming;
 using Folio.Desktop.ViewModels;
@@ -18,8 +19,10 @@ public static class ServiceCollectionExtensions
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();
         services.AddTransient<WelcomeViewModel>();
+        services.AddTransient<ChartOfAccountsViewModel>();
 
         services.AddSingleton<MainWindow>();
+        services.AddSingleton<IDialogService, DialogService>();
 
         return services;
     }

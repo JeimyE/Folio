@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using Folio.Desktop.DependencyInjection;
 using Folio.Desktop.ErrorHandling;
+using Folio.Desktop.Globalization;
 using Folio.Desktop.Theming;
 using Folio.Infrastructure.Common;
 using Folio.Infrastructure.DependencyInjection;
@@ -39,9 +40,7 @@ public partial class App : System.Windows.Application
         // window closed" and shut the app down before anything ever appears.
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-        var culture = new CultureInfo("es-CR");
-        CultureInfo.DefaultThreadCurrentCulture = culture;
-        CultureInfo.DefaultThreadCurrentUICulture = culture;
+        FolioCulture.Apply();
 
         GlobalExceptionHandler.Register(this);
 

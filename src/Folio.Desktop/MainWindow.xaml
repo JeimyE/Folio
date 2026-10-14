@@ -22,6 +22,15 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ui:TitleBar x:Name="RootTitleBar" Grid.Row="0" Title="{x:Static res:Strings.AppTitle}" />
-        <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
+        <!-- ContentDialogHost's own Content is the dialog currently showing (it's a
+             dimming mask + anchor, not a content wrapper) — ContentDialog.ShowAsync
+             sets it internally and clears it back to null on close. It must sit as a
+             SIBLING on top of the real page content, in the same cell, never wrap it:
+             nesting the page inside it here once made the whole window go blank after
+             any dialog closed, because closing replaced the page with null. -->
+        <Grid Grid.Row="1">
+            <ContentControl Content="{Binding CurrentViewModel}" />
+            <ui:ContentDialogHost />
+        </Grid>
     </Grid>
 </ui:FluentWindow>

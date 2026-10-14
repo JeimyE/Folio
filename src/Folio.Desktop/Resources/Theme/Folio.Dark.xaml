@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework">
 
     <!-- Folio brand palette ("Bosque") — dark variant. Same resource keys as
          Folio.Light.xaml, so swapping which dictionary is merged is enough to
@@ -17,5 +18,12 @@
     <SolidColorBrush x:Key="FolioSurfaceBrush" Color="{StaticResource FolioSurfaceColor}" />
     <SolidColorBrush x:Key="FolioTextBrush" Color="{StaticResource FolioTextColor}" />
     <SolidColorBrush x:Key="FolioErrorBrush" Color="{StaticResource FolioErrorColor}" />
+
+    <!-- See Folio.Light.xaml's remark: keeps built-in selection colors (TreeView,
+         ListBox, etc.) on brand instead of the Windows accent color. -->
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
 
 </ResourceDictionary>

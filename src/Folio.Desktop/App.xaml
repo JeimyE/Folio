@@ -28,6 +28,9 @@
             <DataTemplate DataType="{x:Type vm:WelcomeViewModel}">
                 <views:WelcomeView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ChartOfAccountsViewModel}">
+                <views:ChartOfAccountsView />
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

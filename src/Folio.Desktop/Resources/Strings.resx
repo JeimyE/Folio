@@ -62,4 +62,130 @@
   <data name="WelcomeGreetingFormat" xml:space="preserve">
     <value>Bienvenido/a, {0}</value>
   </data>
+  <data name="NavWelcome" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="NavChartOfAccounts" xml:space="preserve">
+    <value>Catálogo de cuentas</value>
+  </data>
+  <data name="ChartOfAccountsTitle" xml:space="preserve">
+    <value>Catálogo de cuentas</value>
+  </data>
+  <data name="ChartOfAccountsSearchPlaceholder" xml:space="preserve">
+    <value>Buscar por código o nombre...</value>
+  </data>
+  <data name="ChartOfAccountsAddRoot" xml:space="preserve">
+    <value>Nueva cuenta</value>
+  </data>
+  <data name="ChartOfAccountsAddChild" xml:space="preserve">
+    <value>Nueva subcuenta</value>
+  </data>
+  <data name="ChartOfAccountsEdit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="ChartOfAccountsActivate" xml:space="preserve">
+    <value>Activar</value>
+  </data>
+  <data name="ChartOfAccountsDeactivate" xml:space="preserve">
+    <value>Desactivar</value>
+  </data>
+  <data name="ChartOfAccountsDelete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="ChartOfAccountsNoSelectionHint" xml:space="preserve">
+    <value>Seleccione una cuenta en el árbol para ver sus detalles.</value>
+  </data>
+  <data name="ChartOfAccountsDetailCode" xml:space="preserve">
+    <value>Código</value>
+  </data>
+  <data name="ChartOfAccountsDetailType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="ChartOfAccountsDetailNormalBalance" xml:space="preserve">
+    <value>Saldo normal</value>
+  </data>
+  <data name="ChartOfAccountsDetailBalance" xml:space="preserve">
+    <value>Saldo</value>
+  </data>
+  <data name="ChartOfAccountsDetailStatus" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="ChartOfAccountsStatusActive" xml:space="preserve">
+    <value>Activa</value>
+  </data>
+  <data name="ChartOfAccountsStatusInactive" xml:space="preserve">
+    <value>Inactiva</value>
+  </data>
+  <data name="ChartOfAccountsKindGroup" xml:space="preserve">
+    <value>Cuenta de agrupación</value>
+  </data>
+  <data name="ChartOfAccountsKindPostable" xml:space="preserve">
+    <value>Cuenta postable</value>
+  </data>
+  <data name="ChartOfAccountsNewAccountTitle" xml:space="preserve">
+    <value>Nueva cuenta</value>
+  </data>
+  <data name="ChartOfAccountsEditAccountTitle" xml:space="preserve">
+    <value>Editar cuenta</value>
+  </data>
+  <data name="ChartOfAccountsDeleteConfirmTitle" xml:space="preserve">
+    <value>Eliminar cuenta</value>
+  </data>
+  <data name="ChartOfAccountsDeleteConfirmMessageFormat" xml:space="preserve">
+    <value>¿Está segura de que desea eliminar la cuenta {0} - {1}? Esta acción no se puede deshacer.</value>
+  </data>
+  <data name="AccountFormCode" xml:space="preserve">
+    <value>Código</value>
+  </data>
+  <data name="AccountFormName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="AccountFormType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AccountFormNormalBalance" xml:space="preserve">
+    <value>Saldo normal</value>
+  </data>
+  <data name="AccountFormIsPostable" xml:space="preserve">
+    <value>Postable (acepta movimientos)</value>
+  </data>
+  <data name="AccountFormDescription" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="AccountFormNameRequired" xml:space="preserve">
+    <value>El nombre es obligatorio.</value>
+  </data>
+  <data name="DialogSave" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="AccountTypeAsset" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="AccountTypeLiability" xml:space="preserve">
+    <value>Pasivo</value>
+  </data>
+  <data name="AccountTypeEquity" xml:space="preserve">
+    <value>Patrimonio</value>
+  </data>
+  <data name="AccountTypeRevenue" xml:space="preserve">
+    <value>Ingreso</value>
+  </data>
+  <data name="AccountTypeCost" xml:space="preserve">
+    <value>Costo</value>
+  </data>
+  <data name="AccountTypeExpense" xml:space="preserve">
+    <value>Gasto</value>
+  </data>
+  <data name="NormalBalanceDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="NormalBalanceCredit" xml:space="preserve">
+    <value>Crédito</value>
+  </data>
 </root>

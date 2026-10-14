@@ -17,12 +17,30 @@ public sealed partial class ShellViewModel(
     [ObservableProperty]
     private string _fullName = string.Empty;
 
+    [ObservableProperty]
+    private ShellPage _currentPage = ShellPage.Welcome;
+
     public INavigationService Navigation => navigationService;
 
     public void Initialize(string fullName)
     {
         FullName = fullName;
         navigationService.NavigateTo<WelcomeViewModel>().Initialize(fullName);
+        CurrentPage = ShellPage.Welcome;
+    }
+
+    [RelayCommand]
+    private void NavigateToWelcome()
+    {
+        navigationService.NavigateTo<WelcomeViewModel>().Initialize(FullName);
+        CurrentPage = ShellPage.Welcome;
+    }
+
+    [RelayCommand]
+    private async Task NavigateToChartOfAccountsAsync()
+    {
+        await navigationService.NavigateTo<ChartOfAccountsViewModel>().InitializeAsync();
+        CurrentPage = ShellPage.ChartOfAccounts;
     }
 
     [RelayCommand]

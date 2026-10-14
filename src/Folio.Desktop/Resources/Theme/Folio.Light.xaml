@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework">
 
     <!-- Folio brand palette ("Bosque") — light variant. -->
     <Color x:Key="FolioPrimaryColor">#3F6B4A</Color>
@@ -15,5 +16,14 @@
     <SolidColorBrush x:Key="FolioSurfaceBrush" Color="{StaticResource FolioSurfaceColor}" />
     <SolidColorBrush x:Key="FolioTextBrush" Color="{StaticResource FolioTextColor}" />
     <SolidColorBrush x:Key="FolioErrorBrush" Color="{StaticResource FolioErrorColor}" />
+
+    <!-- Every built-in WPF control (TreeView, ListBox, etc.) that hasn't been given
+         its own selection styling looks up these two keys for its selected-item
+         colors, and they default to the Windows accent color — overriding them here
+         keeps that "free" styling on brand instead of showing up as Windows blue. -->
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
 
 </ResourceDictionary>
