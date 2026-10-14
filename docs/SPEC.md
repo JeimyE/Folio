@@ -180,7 +180,7 @@ Use the latest **LTS** .NET SDK installed on the machine (check `dotnet --list-s
 `Debit`/`Credit` stored in functional currency. Indexes on `JournalEntries(Date)`, `JournalLines(AccountId)`, `Accounts(Code)`, `AuditLogs(Timestamp)`.
 
 ### Demo data
-Seed one demo company (*Café Perezoso S.A.*, a small coffee shop), the full chart of accounts, 12 months of realistic posted entries (opening capital, a bank loan, rent, payroll with cargas sociales, sales with IVA, purchases with IVA, utilities, depreciation, a few USD transactions), exchange rates for that range, and closed periods for every month except the current one. Seeding runs only when the database is empty.
+Seed one demo company (*Sleepy Sloth Café & Bakery S.A.*, a café and bakery in a Costa Rican tourist area that sells in both colones and dollars), the full chart of accounts, and 12 months of realistic posted entries: opening capital, a bank loan, rent, payroll for baristas and bakers with cargas sociales, sales of coffee and baked goods with IVA (some to tourists in USD), purchases of supplies (coffee beans, flour, dairy) with IVA, utilities, depreciation, and a few other USD transactions. Also seed exchange rates for that range, and closed periods for every month except the current one. Seeding runs only when the database is empty.
 
 ---
 
