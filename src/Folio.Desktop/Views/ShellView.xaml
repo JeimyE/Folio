@@ -1,0 +1,71 @@
+<UserControl x:Class="Folio.Desktop.Views.ShellView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:res="clr-namespace:Folio.Desktop.Resources">
+    <Grid Background="{DynamicResource FolioBackgroundBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- A colored edge, not just a flat white-on-cream contrast, separates the
+             side rail from the content area (coherent with the Bosque palette either
+             theme is in). -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource FolioSurfaceBrush}"
+                BorderBrush="{DynamicResource FolioPrimaryBrush}"
+                BorderThickness="0,0,1,0">
+            <!-- Explicit rows (Auto header / * spacer / Auto footer), not a DockPanel
+                 last-child-fill, so the footer buttons are unambiguously pinned to the
+                 bottom regardless of how much space the middle (future nav) area takes. -->
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <TextBlock Text="{x:Static res:Strings.AppTitle}"
+                               FontSize="22" FontWeight="Bold"
+                               Foreground="{DynamicResource FolioPrimaryBrush}" />
+                    <TextBlock Text="{Binding FullName}"
+                               Foreground="{DynamicResource FolioTextBrush}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Grid.Row="1" is the spacer: navigation items land here from M4 on. -->
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <ui:Button Icon="{ui:SymbolIcon WeatherSunny24}"
+                               Command="{Binding ToggleThemeCommand}"
+                               Appearance="Transparent"
+                               ToolTip="{x:Static res:Strings.ShellToggleTheme}"
+                               Width="36" Height="36"
+                               Padding="0"
+                               Margin="0,0,8,0" />
+
+                    <ui:Button Content="{x:Static res:Strings.ShellSignOut}"
+                               Icon="{ui:SymbolIcon SignOut24}"
+                               Command="{Binding SignOutCommand}"
+                               Appearance="Transparent"
+                               VerticalAlignment="Center">
+                        <ui:Button.Style>
+                            <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioErrorBrush}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ContentControl Grid.Column="1" Content="{Binding Navigation.CurrentViewModel}" Margin="24" />
+    </Grid>
+</UserControl>
