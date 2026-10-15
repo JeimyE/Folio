@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Folio · Catálogo de cuentas (Libro mayor)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Source+Sans+3:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FBF8F1}
+a{color:#8B5E3C}a:hover{color:#6E4527}
+</style>
+</helmet>
+<div style="min-height: 820px; display: flex; flex-wrap: wrap; font-family: 'Source Sans 3', system-ui, sans-serif; color: #2B2A27; background: #FBF8F1">
+
+  <nav aria-label="Menú principal" style="flex: 1 1 232px; max-width: 100%; border-right: 1px solid #E4DCCB; background: #F4EEE2; display: flex; flex-direction: column; padding: 28px 18px; box-sizing: border-box; gap: 28px">
+    <div style="padding: 0 8px">
+      <div style="font-family: 'Fraunces', Georgia, serif; font-size: 30px; font-weight: 700; color: #2E4A36; letter-spacing: -0.01em">Folio</div>
+      <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8B5E3C; font-weight: 600">Folivora Software</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Inicio</a>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Dashboard</a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-family: 'Fraunces', Georgia, serif; font-size: 14px; font-style: italic; color: #8B5E3C; padding: 0 10px 6px">Contabilidad</div>
+      <a href="#" aria-current="page" style="padding: 9px 10px; color: #2E4A36; text-decoration: none; font-size: 15px; font-weight: 700; border-left: 3px solid #3F6B4A; background: #EAE3D2">Catálogo de cuentas</a>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Asientos</a>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Períodos</a>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Tipos de cambio</a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-family: 'Fraunces', Georgia, serif; font-size: 14px; font-style: italic; color: #8B5E3C; padding: 0 10px 6px">Reportes</div>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Libro diario</a>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Libro mayor</a>
+      <a href="#" style="padding: 9px 10px; color: #4A473F; text-decoration: none; font-size: 15px">Estados financieros</a>
+    </div>
+
+    <div style="margin-top: auto; border-top: 1px solid #E4DCCB; padding: 16px 10px 0; display: flex; flex-direction: column; gap: 10px">
+      <div>
+        <div style="font-size: 14px; font-weight: 700">Administradora del Sistema</div>
+        <div style="font-size: 13px; color: #6E6A60">Administrador</div>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <button type="button" style="height: 34px; padding: 0 12px; border: 1px solid #D8CFBB; border-radius: 6px; background: transparent; color: #4A473F; font: inherit; font-size: 13px; cursor: pointer">Tema oscuro</button>
+        <button type="button" style="height: 34px; padding: 0 12px; border: 1px solid #D8CFBB; border-radius: 6px; background: transparent; color: #4A473F; font: inherit; font-size: 13px; cursor: pointer">Salir</button>
+      </div>
+    </div>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 36px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+    <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid #2E4A36">
+      <div>
+        <div style="font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #8B5E3C; font-weight: 600">Sleepy Sloth Café &amp; Bakery S.A.</div>
+        <h1 style="margin: 6px 0 0; font-family: 'Fraunces', Georgia, serif; font-size: 40px; font-weight: 600; letter-spacing: -0.01em; color: #2E4A36">Catálogo de cuentas</h1>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+        <label style="display: flex; align-items: center; gap: 8px; height: 40px; width: 260px; max-width: 100%; padding: 0 12px; border: 1px solid #D8CFBB; border-radius: 6px; background: #FFFFFF">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Buscar cuenta</span>
+          <input type="search" placeholder="Código o nombre" style="flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 15px">
+        </label>
+        <button type="button" style="height: 40px; padding: 0 18px; border: 0; border-radius: 6px; background: #2E4A36; color: #FBF8F1; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">+ Nueva cuenta</button>
+      </div>
+    </header>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+      <section aria-label="Árbol de cuentas" style="flex: 3 1 480px; min-width: 0">
+        <div style="display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; margin-bottom: 14px">
+          <button type="button" style="border: 0; background: transparent; padding: 0 0 4px; font: inherit; font-weight: 700; color: #2E4A36; border-bottom: 2px solid #8B5E3C; cursor: pointer">Todas · 43</button>
+          <button type="button" style="border: 0; background: transparent; padding: 0 0 4px; font: inherit; color: #6E6A60; cursor: pointer">Activo</button>
+          <button type="button" style="border: 0; background: transparent; padding: 0 0 4px; font: inherit; color: #6E6A60; cursor: pointer">Pasivo</button>
+          <button type="button" style="border: 0; background: transparent; padding: 0 0 4px; font: inherit; color: #6E6A60; cursor: pointer">Patrimonio</button>
+          <button type="button" style="border: 0; background: transparent; padding: 0 0 4px; font: inherit; color: #6E6A60; cursor: pointer">Ingresos</button>
+          <button type="button" style="border: 0; background: transparent; padding: 0 0 4px; font: inherit; color: #6E6A60; cursor: pointer">Costos y gastos</button>
+        </div>
+
+        <div style="font-size: 15px">
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 10px 0; border-bottom: 1px solid #E4DCCB">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1</span>
+            <span style="font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 600; color: #2E4A36">Activo</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">18 452 310,00</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 0 9px 24px; border-bottom: 1px solid #EFE8DA">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1.1</span>
+            <span style="font-weight: 700">Activo corriente</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">6 214 870,45</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 12px 9px 48px; border-bottom: 1px solid #EFE8DA; background: #EFE6D3; margin: 0 -12px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1.1.01</span>
+            <span style="font-weight: 600; color: #2E4A36">Caja</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #BFB397; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace">1 479 862,69</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 0 9px 48px; border-bottom: 1px solid #EFE8DA">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1.1.02</span>
+            <span>Bancos colones</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace">3 102 540,12</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 0 9px 48px; border-bottom: 1px solid #EFE8DA">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1.1.03</span>
+            <span>Bancos dólares</span>
+            <span style="font-size: 12px; color: #6E6A60; border: 1px solid #D8CFBB; border-radius: 4px; padding: 0 5px">USD</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace">812 300,00</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 0 9px 48px; border-bottom: 1px solid #EFE8DA">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1.1.04</span>
+            <span>Cuentas por cobrar</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace">420 167,64</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 0 9px 48px; border-bottom: 1px solid #EFE8DA; color: #9A9486">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; width: 64px">1.1.07</span>
+            <span style="text-decoration: line-through">Caja chica (antigua)</span>
+            <span style="font-size: 12px; font-style: italic">inactiva</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #DDD4C2; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace">0,00</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 9px 0 9px 24px; border-bottom: 1px solid #EFE8DA">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">1.2</span>
+            <span style="font-weight: 700">Activo no corriente</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">12 237 439,55</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 10px 0; border-bottom: 1px solid #E4DCCB">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">2</span>
+            <span style="font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 600; color: #2E4A36">Pasivo</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">9 870 215,30</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 10px 0; border-bottom: 1px solid #E4DCCB">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">3</span>
+            <span style="font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 600; color: #2E4A36">Patrimonio</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">8 582 094,70</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px; padding: 10px 0; border-bottom: 1px solid #E4DCCB">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C; width: 64px">4</span>
+            <span style="font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 600; color: #2E4A36">Ingresos</span>
+            <span aria-hidden="true" style="flex: 1; border-bottom: 1px dotted #CFC5AF; transform: translateY(-4px)"></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">31 640 980,00</span>
+          </div>
+        </div>
+        <div style="margin-top: 14px; font-size: 13px; color: #6E6A60; font-style: italic">Montos en colones (₡). Activo = Pasivo + Patrimonio ✓</div>
+      </section>
+
+      <aside aria-label="Detalle de la cuenta" style="flex: 2 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #E4DCCB; border-radius: 4px; box-shadow: 4px 4px 0 #EAE3D2; padding: 26px; display: flex; flex-direction: column; gap: 20px">
+        <div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B5E3C">Cuenta 1.1.01 · Activo corriente</div>
+          <h2 style="margin: 4px 0 0; font-family: 'Fraunces', Georgia, serif; font-size: 32px; font-weight: 600; color: #2E4A36">Caja</h2>
+          <div style="margin-top: 8px; font-size: 14px; color: #4A473F">Activa · Postable · Naturaleza deudora</div>
+        </div>
+
+        <div>
+          <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8B5E3C; font-weight: 600; text-align: center; margin-bottom: 8px">Cuenta T</div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 2px solid #2E4A36">
+            <div style="padding: 10px 14px 12px 0; border-right: 2px solid #2E4A36">
+              <div style="font-size: 13px; font-weight: 700; color: #2E4A36">Debe</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 18px; margin-top: 4px">8 954 210,40</div>
+            </div>
+            <div style="padding: 10px 0 12px 14px; text-align: right">
+              <div style="font-size: 13px; font-weight: 700; color: #2E4A36">Haber</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 18px; margin-top: 4px">7 474 347,71</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #E4DCCB; border-bottom: 3px double #2E4A36; padding: 10px 0">
+            <span style="font-family: 'Fraunces', Georgia, serif; font-size: 16px; font-weight: 600">Saldo</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; font-weight: 600; color: #2E4A36">₡1 479 862,69</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px">
+            <span style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8B5E3C; font-weight: 600">Saldo por mes</span>
+            <span style="font-family: 'Fraunces', Georgia, serif; font-size: 13px; font-style: italic; color: #6E6A60">últimos 6 meses</span>
+          </div>
+          <svg width="100%" height="76" viewBox="0 0 300 76" preserveAspectRatio="none" role="img" aria-label="Saldo de Caja en los últimos seis meses, con tendencia creciente">
+            <line x1="0" y1="75.5" x2="300" y2="75.5" stroke="#2E4A36" stroke-width="1"></line>
+            <line x1="0" y1="38" x2="300" y2="38" stroke="#E4DCCB" stroke-width="1" stroke-dasharray="2 3"></line>
+            <rect x="14" y="40" width="26" height="35" fill="#D9CDB4"></rect>
+            <rect x="64" y="33" width="26" height="42" fill="#D9CDB4"></rect>
+            <rect x="114" y="36" width="26" height="39" fill="#D9CDB4"></rect>
+            <rect x="164" y="24" width="26" height="51" fill="#D9CDB4"></rect>
+            <rect x="214" y="18" width="26" height="57" fill="#D9CDB4"></rect>
+            <rect x="264" y="8" width="26" height="67" fill="#3F6B4A"></rect>
+          </svg>
+          <div style="display: flex; justify-content: space-between; padding: 4px 10px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8576"><span>may</span><span>jun</span><span>jul</span><span>ago</span><span>sep</span><span>oct</span></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column">
+          <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8B5E3C; font-weight: 600; margin-bottom: 4px">Últimos asientos</div>
+          <div style="display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #EFE8DA; font-size: 14px"><span><span style="font-family: 'IBM Plex Mono', monospace; color: #8B5E3C">#108</span> Ventas del día</span><span style="font-family: 'IBM Plex Mono', monospace">245 300,00 D</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #EFE8DA; font-size: 14px"><span><span style="font-family: 'IBM Plex Mono', monospace; color: #8B5E3C">#107</span> Compra de insumos</span><span style="font-family: 'IBM Plex Mono', monospace">86 450,00 H</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; font-size: 14px"><span><span style="font-family: 'IBM Plex Mono', monospace; color: #8B5E3C">#105</span> Depósito a bancos</span><span style="font-family: 'IBM Plex Mono', monospace">500 000,00 H</span></div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <button type="button" style="height: 38px; padding: 0 14px; border: 1px solid #2E4A36; border-radius: 6px; background: transparent; color: #2E4A36; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Editar</button>
+          <button type="button" style="height: 38px; padding: 0 14px; border: 1px solid #D8CFBB; border-radius: 6px; background: transparent; color: #4A473F; font: inherit; font-size: 14px; cursor: pointer">Nueva subcuenta</button>
+          <button type="button" style="height: 38px; padding: 0 14px; border: 1px solid #D8CFBB; border-radius: 6px; background: transparent; color: #4A473F; font: inherit; font-size: 14px; cursor: pointer">Desactivar</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
