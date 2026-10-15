@@ -2,28 +2,58 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework">
 
-    <!-- Folio brand palette ("Bosque") — light variant. -->
-    <Color x:Key="FolioPrimaryColor">#3F6B4A</Color>
-    <Color x:Key="FolioAccentColor">#8B5E3C</Color>
-    <Color x:Key="FolioBackgroundColor">#F7F3EA</Color>
+    <!-- "Libro mayor" design system (ADR-0014) — light variant. -->
+    <Color x:Key="FolioPaperColor">#FBF8F1</Color>
+    <Color x:Key="FolioSidebarColor">#F4EEE2</Color>
+    <Color x:Key="FolioSidebarBorderColor">#E4DCCB</Color>
     <Color x:Key="FolioSurfaceColor">#FFFFFF</Color>
+    <Color x:Key="FolioShadowColor">#EAE3D2</Color>
+    <Color x:Key="FolioTitleColor">#2E4A36</Color>
+    <Color x:Key="FolioActionColor">#3F6B4A</Color>
+    <Color x:Key="FolioAccentColor">#8B5E3C</Color>
     <Color x:Key="FolioTextColor">#2B2A27</Color>
-    <Color x:Key="FolioErrorColor">#B54A3C</Color>
+    <Color x:Key="FolioTextSecondaryColor">#6E6A60</Color>
+    <Color x:Key="FolioLineColor">#E4DCCB</Color>
+    <Color x:Key="FolioLineDottedColor">#CFC5AF</Color>
+    <Color x:Key="FolioPositiveColor">#2C6B3F</Color>
+    <Color x:Key="FolioNegativeColor">#9C3F31</Color>
+    <!-- "Fondo papel oscuro" for a selected ledger row — not part of Jeimy's original
+         token list, added for component #4's selected-row look specifically. -->
+    <Color x:Key="FolioRowSelectedColor">#EFE6D3</Color>
+    <!-- Text color that stays legible painted on top of FolioTitleBrush — happens to
+         equal FolioPaperColor in this theme (title green is dark enough that the
+         theme's own paper tone is already the right contrast), but is its own token
+         since the role ("text on an accent-colored surface") is conceptually
+         different from "page background" and could diverge later. -->
+    <Color x:Key="FolioOnTitleColor">#FBF8F1</Color>
 
-    <SolidColorBrush x:Key="FolioPrimaryBrush" Color="{StaticResource FolioPrimaryColor}" />
-    <SolidColorBrush x:Key="FolioAccentBrush" Color="{StaticResource FolioAccentColor}" />
-    <SolidColorBrush x:Key="FolioBackgroundBrush" Color="{StaticResource FolioBackgroundColor}" />
+    <SolidColorBrush x:Key="FolioPaperBrush" Color="{StaticResource FolioPaperColor}" />
+    <SolidColorBrush x:Key="FolioSidebarBrush" Color="{StaticResource FolioSidebarColor}" />
+    <SolidColorBrush x:Key="FolioSidebarBorderBrush" Color="{StaticResource FolioSidebarBorderColor}" />
     <SolidColorBrush x:Key="FolioSurfaceBrush" Color="{StaticResource FolioSurfaceColor}" />
+    <SolidColorBrush x:Key="FolioShadowBrush" Color="{StaticResource FolioShadowColor}" />
+    <SolidColorBrush x:Key="FolioTitleBrush" Color="{StaticResource FolioTitleColor}" />
+    <SolidColorBrush x:Key="FolioActionBrush" Color="{StaticResource FolioActionColor}" />
+    <SolidColorBrush x:Key="FolioAccentBrush" Color="{StaticResource FolioAccentColor}" />
     <SolidColorBrush x:Key="FolioTextBrush" Color="{StaticResource FolioTextColor}" />
-    <SolidColorBrush x:Key="FolioErrorBrush" Color="{StaticResource FolioErrorColor}" />
+    <SolidColorBrush x:Key="FolioTextSecondaryBrush" Color="{StaticResource FolioTextSecondaryColor}" />
+    <SolidColorBrush x:Key="FolioLineBrush" Color="{StaticResource FolioLineColor}" />
+    <SolidColorBrush x:Key="FolioLineDottedBrush" Color="{StaticResource FolioLineDottedColor}" />
+    <SolidColorBrush x:Key="FolioPositiveBrush" Color="{StaticResource FolioPositiveColor}" />
+    <SolidColorBrush x:Key="FolioNegativeBrush" Color="{StaticResource FolioNegativeColor}" />
+    <SolidColorBrush x:Key="FolioRowSelectedBrush" Color="{StaticResource FolioRowSelectedColor}" />
+    <SolidColorBrush x:Key="FolioOnTitleBrush" Color="{StaticResource FolioOnTitleColor}" />
 
     <!-- Every built-in WPF control (TreeView, ListBox, etc.) that hasn't been given
          its own selection styling looks up these two keys for its selected-item
-         colors, and they default to the Windows accent color — overriding them here
-         keeps that "free" styling on brand instead of showing up as Windows blue. -->
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
+         colors. Pointed at the brand "títulos" green (the same green WPF-UI's own
+         accent now uses — see ThemeService), so every default selection in the app
+         is one consistent green. ChartOfAccountsView's own TreeView re-shadows these
+         same keys locally, scoped to just that control, for its deliberately subtler
+         "papel oscuro" selected-row look (ADR-0014). -->
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightBrushKey}" Color="{StaticResource FolioTitleColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightTextBrushKey}" Color="{StaticResource FolioOnTitleColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource FolioTitleColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource FolioOnTitleColor}" />
 
 </ResourceDictionary>

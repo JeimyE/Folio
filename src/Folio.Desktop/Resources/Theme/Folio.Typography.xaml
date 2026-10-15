@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- "Libro mayor" design system (ADR-0014) — embedded fonts. Not theme-swapped;
+         merged once in App.xaml and shared by both light and dark.
+
+         Fraunces and Source Sans 3 ship from Google Fonts only as variable-axis
+         .ttf files (no static per-weight cuts exist upstream) — confirmed via
+         Fonts.GetFontFamilies that WPF/DirectWrite correctly resolves every named
+         weight instance (Thin…Black, upright and italic) from a single embedded
+         file, so FontWeight/FontStyle on a TextBlock just works without needing
+         one file per weight. IBM Plex Mono does ship real static files upstream,
+         so those are used directly instead. -->
+    <FontFamily x:Key="FolioSerifFontFamily">pack://application:,,,/Resources/Fonts/Fraunces/#Fraunces 9pt</FontFamily>
+    <FontFamily x:Key="FolioBodyFontFamily">pack://application:,,,/Resources/Fonts/SourceSans3/#Source Sans 3</FontFamily>
+    <FontFamily x:Key="FolioMonoFontFamily">pack://application:,,,/Resources/Fonts/IBMPlexMono/#IBM Plex Mono</FontFamily>
+
+</ResourceDictionary>

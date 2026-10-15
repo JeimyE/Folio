@@ -15,9 +15,11 @@ public sealed class ThemeService : IThemeService
     private static readonly Uri LightDictionaryUri = new("pack://application:,,,/Resources/Theme/Folio.Light.xaml");
     private static readonly Uri DarkDictionaryUri = new("pack://application:,,,/Resources/Theme/Folio.Dark.xaml");
 
-    // Must stay in sync with FolioPrimaryColor in Folio.Light.xaml / Folio.Dark.xaml.
-    private static readonly Color LightPrimaryColor = (Color)ColorConverter.ConvertFromString("#3F6B4A");
-    private static readonly Color DarkPrimaryColor = (Color)ColorConverter.ConvertFromString("#7FA57A");
+    // Must stay in sync with FolioTitleColor in Folio.Light.xaml / Folio.Dark.xaml —
+    // WPF-UI's accent (Primary buttons, selection highlights) uses the same "títulos"
+    // green as headings throughout the app, by design (ADR-0014).
+    private static readonly Color LightTitleColor = (Color)ColorConverter.ConvertFromString("#2E4A36");
+    private static readonly Color DarkTitleColor = (Color)ColorConverter.ConvertFromString("#9CC096");
 
     public AppTheme CurrentTheme { get; private set; } = AppTheme.Light;
 
@@ -47,7 +49,7 @@ public sealed class ThemeService : IThemeService
         // ApplicationAccentColorManager.Apply sets WPF-UI's accent — used by button
         // "Primary" appearance, selection highlights, etc. — to Folio's own primary.
         ApplicationThemeManager.Apply(wpfUiTheme, WindowBackdropType.None, updateAccent: false);
-        ApplicationAccentColorManager.Apply(theme == AppTheme.Dark ? DarkPrimaryColor : LightPrimaryColor, wpfUiTheme);
+        ApplicationAccentColorManager.Apply(theme == AppTheme.Dark ? DarkTitleColor : LightTitleColor, wpfUiTheme);
 
         var dictionaries = System.Windows.Application.Current.Resources.MergedDictionaries;
         var existing = dictionaries.FirstOrDefault(d =>

@@ -2,28 +2,51 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System.Windows;assembly=PresentationFramework">
 
-    <!-- Folio brand palette ("Bosque") — dark variant. Same resource keys as
-         Folio.Light.xaml, so swapping which dictionary is merged is enough to
+    <!-- "Libro mayor" design system (ADR-0014) — dark variant. Same resource keys
+         as Folio.Light.xaml, so swapping which dictionary is merged is enough to
          retheme every view that references them. -->
-    <Color x:Key="FolioPrimaryColor">#7FA57A</Color>
+    <Color x:Key="FolioPaperColor">#1A1F1B</Color>
+    <Color x:Key="FolioSidebarColor">#151A16</Color>
+    <Color x:Key="FolioSidebarBorderColor">#2A312B</Color>
+    <Color x:Key="FolioSurfaceColor">#232A24</Color>
+    <Color x:Key="FolioShadowColor">#101410</Color>
+    <Color x:Key="FolioTitleColor">#9CC096</Color>
+    <Color x:Key="FolioActionColor">#7FA57A</Color>
     <Color x:Key="FolioAccentColor">#C49A6C</Color>
-    <Color x:Key="FolioBackgroundColor">#1C211D</Color>
-    <Color x:Key="FolioSurfaceColor">#252B26</Color>
     <Color x:Key="FolioTextColor">#ECE8DF</Color>
-    <Color x:Key="FolioErrorColor">#E07A6B</Color>
+    <Color x:Key="FolioTextSecondaryColor">#A3A99F</Color>
+    <Color x:Key="FolioLineColor">#343C35</Color>
+    <Color x:Key="FolioLineDottedColor">#4A524B</Color>
+    <Color x:Key="FolioPositiveColor">#8FCB8A</Color>
+    <Color x:Key="FolioNegativeColor">#E07A6B</Color>
+    <!-- Estimated — not in the mockup's dark palette, needs a visual look from Jeimy. -->
+    <Color x:Key="FolioRowSelectedColor">#2A3129</Color>
+    <!-- Dark text, since the títulos green is light in this theme — see
+         Folio.Light.xaml's remark on this token's role. -->
+    <Color x:Key="FolioOnTitleColor">#1A1F1B</Color>
 
-    <SolidColorBrush x:Key="FolioPrimaryBrush" Color="{StaticResource FolioPrimaryColor}" />
-    <SolidColorBrush x:Key="FolioAccentBrush" Color="{StaticResource FolioAccentColor}" />
-    <SolidColorBrush x:Key="FolioBackgroundBrush" Color="{StaticResource FolioBackgroundColor}" />
+    <SolidColorBrush x:Key="FolioPaperBrush" Color="{StaticResource FolioPaperColor}" />
+    <SolidColorBrush x:Key="FolioSidebarBrush" Color="{StaticResource FolioSidebarColor}" />
+    <SolidColorBrush x:Key="FolioSidebarBorderBrush" Color="{StaticResource FolioSidebarBorderColor}" />
     <SolidColorBrush x:Key="FolioSurfaceBrush" Color="{StaticResource FolioSurfaceColor}" />
+    <SolidColorBrush x:Key="FolioShadowBrush" Color="{StaticResource FolioShadowColor}" />
+    <SolidColorBrush x:Key="FolioTitleBrush" Color="{StaticResource FolioTitleColor}" />
+    <SolidColorBrush x:Key="FolioActionBrush" Color="{StaticResource FolioActionColor}" />
+    <SolidColorBrush x:Key="FolioAccentBrush" Color="{StaticResource FolioAccentColor}" />
     <SolidColorBrush x:Key="FolioTextBrush" Color="{StaticResource FolioTextColor}" />
-    <SolidColorBrush x:Key="FolioErrorBrush" Color="{StaticResource FolioErrorColor}" />
+    <SolidColorBrush x:Key="FolioTextSecondaryBrush" Color="{StaticResource FolioTextSecondaryColor}" />
+    <SolidColorBrush x:Key="FolioLineBrush" Color="{StaticResource FolioLineColor}" />
+    <SolidColorBrush x:Key="FolioLineDottedBrush" Color="{StaticResource FolioLineDottedColor}" />
+    <SolidColorBrush x:Key="FolioPositiveBrush" Color="{StaticResource FolioPositiveColor}" />
+    <SolidColorBrush x:Key="FolioNegativeBrush" Color="{StaticResource FolioNegativeColor}" />
+    <SolidColorBrush x:Key="FolioRowSelectedBrush" Color="{StaticResource FolioRowSelectedColor}" />
+    <SolidColorBrush x:Key="FolioOnTitleBrush" Color="{StaticResource FolioOnTitleColor}" />
 
     <!-- See Folio.Light.xaml's remark: keeps built-in selection colors (TreeView,
-         ListBox, etc.) on brand instead of the Windows accent color. -->
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource FolioPrimaryColor}" />
-    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource FolioSurfaceColor}" />
+         ListBox, etc.) on the same brand green WPF-UI's accent uses. -->
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightBrushKey}" Color="{StaticResource FolioTitleColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.HighlightTextBrushKey}" Color="{StaticResource FolioOnTitleColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource FolioTitleColor}" />
+    <SolidColorBrush x:Key="{x:Static sys:SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource FolioOnTitleColor}" />
 
 </ResourceDictionary>

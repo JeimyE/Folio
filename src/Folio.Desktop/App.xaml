@@ -11,9 +11,17 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Light" />
                 <ui:ControlsDictionary />
-                <!-- Folio's own "Bosque" brand palette. IThemeService replaces this
-                     entry (and the WPF-UI theme above) together when the theme changes. -->
+                <!-- Folio's own "Libro mayor" brand palette (ADR-0014). IThemeService
+                     replaces this entry (and the WPF-UI theme above) together when
+                     the theme changes. -->
                 <ResourceDictionary Source="pack://application:,,,/Resources/Theme/Folio.Light.xaml" />
+                <!-- Fonts and reusable styles never change with the theme, so they're
+                     merged once, independently of the light/dark swap above. -->
+                <ResourceDictionary Source="pack://application:,,,/Resources/Theme/Folio.Typography.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/Theme/Folio.TextStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/Theme/Folio.ButtonStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/Theme/Folio.CardStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Resources/Theme/Folio.TreeStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- ViewModel-first navigation: each ViewModel type maps to its View via
