@@ -20,7 +20,7 @@ public static class FolioSeeder
         IPasswordHasher passwordHasher,
         CancellationToken cancellationToken = default)
     {
-        var today = DateOnly.FromDateTime(clock.UtcNow);
+        var today = clock.TodayInCostaRica();
         var windowStart = new DateOnly(today.Year, today.Month, 1).AddMonths(-11);
         var windowEnd = new DateOnly(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
 
