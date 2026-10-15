@@ -66,6 +66,62 @@ public sealed class AccountRepository(IDbContextFactory<FolioDbContext> contextF
         return (totalDebit, totalCredit);
     }
 
+    public async Task<IReadOnlyDictionary<Guid, (decimal TotalDebit, decimal TotalCredit)>> GetAllMovementTotalsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var totals = await context.JournalEntries
+            .Where(e => e.Status == JournalEntryStatus.Posted)
+            .SelectMany(e => e.Lines)
+            .GroupBy(l => l.AccountId)
+            .Select(g => new { AccountId = g.Key, TotalDebit = g.Sum(l => l.Debit), TotalCredit = g.Sum(l => l.Credit) })
+            .ToListAsync(cancellationToken);
+
+        return totals.ToDictionary(t => t.AccountId, t => (t.TotalDebit, t.TotalCredit));
+    }
+
+    public async Task<IReadOnlyList<MonthlyMovementTotals>> GetMonthlyMovementTotalsAsync(
+        IEnumerable<Guid> accountIds, DateOnly through, CancellationToken cancellationToken = default)
+    {
+        var idList = accountIds.ToList();
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Unlike GetMovementTotalsAsync, this needs the entry's own Date to group
+        // by month — the two-argument SelectMany overload keeps it alongside the
+        // line's columns instead of discarding it when flattening.
+        var lines = context.JournalEntries
+            .Where(e => e.Status == JournalEntryStatus.Posted && e.Date <= through)
+            .SelectMany(e => e.Lines, (e, l) => new { e.Date, l.AccountId, l.Debit, l.Credit })
+            .Where(x => idList.Contains(x.AccountId));
+
+        return await lines
+            .GroupBy(x => new { x.Date.Year, x.Date.Month })
+            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+            .Select(g => new MonthlyMovementTotals(g.Key.Year, g.Key.Month, g.Sum(x => x.Debit), g.Sum(x => x.Credit)))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<RecentAccountEntry>> GetRecentEntriesAsync(
+        IEnumerable<Guid> accountIds, int take, CancellationToken cancellationToken = default)
+    {
+        var idList = accountIds.ToList();
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        return await context.JournalEntries
+            .Where(e => e.Status == JournalEntryStatus.Posted && e.Lines.Any(l => idList.Contains(l.AccountId)))
+            .OrderByDescending(e => e.Date)
+            .ThenByDescending(e => e.Number)
+            .Take(take)
+            .Select(e => new RecentAccountEntry(
+                e.Id,
+                e.Number,
+                e.Description,
+                e.Date,
+                e.Lines.Where(l => idList.Contains(l.AccountId)).Sum(l => l.Debit),
+                e.Lines.Where(l => idList.Contains(l.AccountId)).Sum(l => l.Credit)))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(Account account, CancellationToken cancellationToken = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);

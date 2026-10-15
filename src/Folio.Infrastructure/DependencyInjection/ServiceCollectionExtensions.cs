@@ -2,6 +2,7 @@ using Folio.Application.Abstractions;
 using Folio.Application.Abstractions.Repositories;
 using Folio.Application.Authentication;
 using Folio.Application.ChartOfAccounts;
+using Folio.Application.Company;
 using Folio.Domain.Common;
 using Folio.Infrastructure.Auditing;
 using Folio.Infrastructure.Common;
@@ -49,6 +50,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IAuthenticationService, AuthenticationService>();
         services.AddSingleton<IChartOfAccountsService, ChartOfAccountsService>();
+        services.AddSingleton<ICompanyContextService, CompanyContextService>();
 
         services.AddHostedService<DatabaseInitializerHostedService>();
 

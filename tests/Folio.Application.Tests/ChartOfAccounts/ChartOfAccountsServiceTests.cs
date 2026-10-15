@@ -1,5 +1,6 @@
 using Folio.Application.Abstractions.Repositories;
 using Folio.Application.ChartOfAccounts;
+using Folio.Domain.Common;
 using Folio.Domain.Entities;
 using Folio.Domain.Enums;
 using Folio.Domain.ValueObjects;
@@ -12,11 +13,13 @@ namespace Folio.Application.Tests.ChartOfAccounts;
 public class ChartOfAccountsServiceTests
 {
     private readonly IAccountRepository _repository = Substitute.For<IAccountRepository>();
+    private readonly IClock _clock = Substitute.For<IClock>();
     private readonly ChartOfAccountsService _sut;
 
     public ChartOfAccountsServiceTests()
     {
-        _sut = new ChartOfAccountsService(_repository);
+        _clock.UtcNow.Returns(new DateTime(2026, 3, 15, 10, 0, 0, DateTimeKind.Utc));
+        _sut = new ChartOfAccountsService(_repository, _clock);
         _repository.GetAllAsync(Arg.Any<CancellationToken>()).Returns((IReadOnlyList<Account>)[]);
     }
 
@@ -297,5 +300,117 @@ public class ChartOfAccountsServiceTests
 
         result.Succeeded.Should().BeTrue();
         await _repository.Received(1).DeleteAsync(account, Arg.Any<CancellationToken>());
+    }
+
+    // --- GetDetailAsync: six-month window ---
+
+    [Fact]
+    public async Task GetDetailAsync_UtcIsAlreadyNextMonth_WindowEndsAtTheCostaRicaMonth()
+    {
+        // 03:00 UTC on July 1 is still 21:00 on June 30 in Costa Rica.
+        _clock.UtcNow.Returns(new DateTime(2026, 7, 1, 3, 0, 0, DateTimeKind.Utc));
+        var caja = new Account(new AccountCode("1.1.01"), "Caja", AccountType.Asset, isPostable: true);
+        _repository.GetByIdAsync(caja.Id, Arg.Any<CancellationToken>()).Returns(caja);
+        _repository.GetMovementTotalsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>()).Returns((0m, 0m));
+        _repository.GetMonthlyMovementTotalsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>())
+            .Returns((IReadOnlyList<MonthlyMovementTotals>)[]);
+        _repository.GetRecentEntriesAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .Returns((IReadOnlyList<RecentAccountEntry>)[]);
+
+        var detail = await _sut.GetDetailAsync(caja.Id);
+
+        detail!.MonthlyBalances.Select(m => (m.Year, m.Month)).Should().Equal(
+            (2026, 1), (2026, 2), (2026, 3), (2026, 4), (2026, 5), (2026, 6));
+        await _repository.Received(1).GetMonthlyMovementTotalsAsync(
+            Arg.Any<IEnumerable<Guid>>(), new DateOnly(2026, 6, 30), Arg.Any<CancellationToken>());
+    }
+
+    // --- GetBalanceCheckAsync ---
+
+    [Fact]
+    public async Task GetBalanceCheckAsync_NoAccounts_ReturnsZeroTotalsAndIsBalanced()
+    {
+        var result = await _sut.GetBalanceCheckAsync();
+
+        result.AssetTotal.Should().Be(0m);
+        result.LiabilityAndEquityTotal.Should().Be(0m);
+        result.IsBalanced.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetBalanceCheckAsync_SeparatesAssetFromLiabilityAndEquity_ExcludingNonPostableAccounts()
+    {
+        var caja = new Account(new AccountCode("1.1.01"), "Caja", AccountType.Asset, isPostable: true);
+        var cuentasPorPagar = new Account(new AccountCode("2.1.01"), "Cuentas por pagar", AccountType.Liability, isPostable: true);
+        var capital = new Account(new AccountCode("3.1"), "Capital social", AccountType.Equity, isPostable: true);
+        var activoGroup = CreateGroupAccount("1", AccountType.Asset); // non-postable: must be excluded
+
+        _repository.GetAllAsync(Arg.Any<CancellationToken>())
+            .Returns((IReadOnlyList<Account>)[caja, cuentasPorPagar, capital, activoGroup]);
+
+        _repository.GetMovementTotalsAsync(
+                Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { caja.Id })),
+                Arg.Any<CancellationToken>())
+            .Returns((1000m, 400m));
+        _repository.GetMovementTotalsAsync(
+                Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { cuentasPorPagar.Id, capital.Id })),
+                Arg.Any<CancellationToken>())
+            .Returns((100m, 700m));
+
+        var result = await _sut.GetBalanceCheckAsync();
+
+        result.AssetTotal.Should().Be(600m); // 1000 debit - 400 credit
+        result.LiabilityAndEquityTotal.Should().Be(600m); // 700 credit - 100 debit
+        result.IsBalanced.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetBalanceCheckAsync_UnclosedRevenueAndExpense_CountAsPartOfEquity()
+    {
+        var caja = new Account(new AccountCode("1.1.01"), "Caja", AccountType.Asset, isPostable: true);
+        var capital = new Account(new AccountCode("3.1"), "Capital social", AccountType.Equity, isPostable: true);
+        var ventas = new Account(new AccountCode("4.1"), "Ventas", AccountType.Revenue, isPostable: true);
+        var alquiler = new Account(new AccountCode("6.1"), "Alquiler", AccountType.Expense, isPostable: true);
+
+        _repository.GetAllAsync(Arg.Any<CancellationToken>())
+            .Returns((IReadOnlyList<Account>)[caja, capital, ventas, alquiler]);
+
+        // Capital 1000 + sales 500 - rent 200 = 1300 in Caja. Without the period's
+        // result on the right-hand side, the check would compare 1300 vs. 1000.
+        _repository.GetMovementTotalsAsync(
+                Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { caja.Id })),
+                Arg.Any<CancellationToken>())
+            .Returns((1500m, 200m));
+        _repository.GetMovementTotalsAsync(
+                Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { capital.Id, ventas.Id, alquiler.Id })),
+                Arg.Any<CancellationToken>())
+            .Returns((200m, 1500m));
+
+        var result = await _sut.GetBalanceCheckAsync();
+
+        result.AssetTotal.Should().Be(1300m);
+        result.LiabilityAndEquityTotal.Should().Be(1300m);
+        result.IsBalanced.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetBalanceCheckAsync_UnequalSides_IsNotBalanced()
+    {
+        var caja = new Account(new AccountCode("1.1.01"), "Caja", AccountType.Asset, isPostable: true);
+        var cuentasPorPagar = new Account(new AccountCode("2.1.01"), "Cuentas por pagar", AccountType.Liability, isPostable: true);
+
+        _repository.GetAllAsync(Arg.Any<CancellationToken>()).Returns((IReadOnlyList<Account>)[caja, cuentasPorPagar]);
+        _repository.GetMovementTotalsAsync(
+                Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { caja.Id })),
+                Arg.Any<CancellationToken>())
+            .Returns((500m, 0m));
+        _repository.GetMovementTotalsAsync(
+                Arg.Is<IEnumerable<Guid>>(ids => ids.ToHashSet().SetEquals(new[] { cuentasPorPagar.Id })),
+                Arg.Any<CancellationToken>())
+            .Returns((0m, 300m));
+
+        var result = await _sut.GetBalanceCheckAsync();
+
+        result.IsBalanced.Should().BeFalse();
     }
 }

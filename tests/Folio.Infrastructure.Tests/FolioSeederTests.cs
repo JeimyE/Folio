@@ -97,6 +97,22 @@ public sealed class FolioSeederTests : IDisposable
     }
 
     [Fact]
+    public async Task SeedAsync_UtcIsAlreadyTheNextDay_UsesTheCostaRicaDateAsToday()
+    {
+        // 03:00 UTC on July 1 is still 21:00 on June 30 in Costa Rica: the seed must
+        // end in June, with nothing dated in July (the future, locally).
+        _clock.UtcNow.Returns(new DateTime(2026, 7, 1, 3, 0, 0, DateTimeKind.Utc));
+        using var context = _factory.CreateContext();
+
+        await FolioSeeder.SeedAsync(context, _clock, _hasher);
+
+        var lastPeriod = await context.Periods.OrderBy(p => p.StartDate).LastAsync();
+        lastPeriod.Month.Should().Be(6);
+        (await context.JournalEntries.MaxAsync(e => e.Date)).Should().Be(new DateOnly(2026, 6, 30));
+        (await context.ExchangeRates.MaxAsync(r => r.Date)).Should().Be(new DateOnly(2026, 6, 30));
+    }
+
+    [Fact]
     public async Task InitializeAsync_FreshDatabase_WritesExactlyOneAuditRow_NotOnePerSeededEntity()
     {
         // FolioDbInitializer, not FolioSeeder directly: the "no audit flood" guarantee

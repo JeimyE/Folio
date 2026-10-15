@@ -24,6 +24,32 @@ public interface IAccountRepository
     /// </summary>
     Task<(decimal TotalDebit, decimal TotalCredit)> GetMovementTotalsAsync(IEnumerable<Guid> accountIds, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Posted movement totals for every account that has any, grouped by account in
+    /// a single SQL <c>GROUP BY</c> — not one query per account — so the chart-of-
+    /// accounts tree can show every row's own balance (ledger design, component #4)
+    /// without an N+1 query per node.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, (decimal TotalDebit, decimal TotalCredit)>> GetAllMovementTotalsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Every calendar month with at least one posted movement for the given accounts,
+    /// up to and including <paramref name="through"/> — the FULL history, not just a
+    /// recent window, so the caller can compute a running closing balance that
+    /// already reflects everything before whatever window it cares about. Ordered by
+    /// year then month, ascending.
+    /// </summary>
+    Task<IReadOnlyList<MonthlyMovementTotals>> GetMonthlyMovementTotalsAsync(
+        IEnumerable<Guid> accountIds, DateOnly through, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The most recent posted journal entries that touched any of the given
+    /// accounts, newest first, each carrying only the combined debit/credit of the
+    /// lines for those accounts (not the entry's other side).
+    /// </summary>
+    Task<IReadOnlyList<RecentAccountEntry>> GetRecentEntriesAsync(
+        IEnumerable<Guid> accountIds, int take, CancellationToken cancellationToken = default);
+
     Task AddAsync(Account account, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Account account, CancellationToken cancellationToken = default);
