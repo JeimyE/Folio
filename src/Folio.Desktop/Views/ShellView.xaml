@@ -3,33 +3,39 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:res="clr-namespace:Folio.Desktop.Resources"
+             xmlns:conv="clr-namespace:Folio.Desktop.Converters"
              xmlns:vm="clr-namespace:Folio.Desktop.ViewModels">
     <UserControl.Resources>
-        <!-- Shared by both nav buttons below: Transparent at rest, filled with the
-             Bosque primary color (and surface-colored text, for contrast) while its
-             page is the one currently shown. -->
+        <conv:UserRoleDisplayConverter x:Key="UserRoleDisplay" />
+
+        <!-- Shared by both nav buttons below: Transparent at rest, filled with
+             FolioRowSelectedBrush and a 3px left accent border while its page is
+             the one currently shown (ADR-0014 — the "papel oscuro" selected look,
+             not a solid green fill). -->
         <Style x:Key="NavButtonStyle" TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
             <Setter Property="Appearance" Value="Transparent" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="BorderThickness" Value="3,0,0,0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="FontFamily" Value="{DynamicResource FolioBodyFontFamily}" />
         </Style>
     </UserControl.Resources>
-    <Grid Background="{DynamicResource FolioBackgroundBrush}">
+    <Grid Background="{DynamicResource FolioPaperBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <!-- A colored edge, not just a flat white-on-cream contrast, separates the
-             side rail from the content area (coherent with the Bosque palette either
-             theme is in). -->
+             side rail from the content area. -->
         <Border Grid.Column="0"
-                Background="{DynamicResource FolioSurfaceBrush}"
-                BorderBrush="{DynamicResource FolioPrimaryBrush}"
+                Background="{DynamicResource FolioSidebarBrush}"
+                BorderBrush="{DynamicResource FolioSidebarBorderBrush}"
                 BorderThickness="0,0,1,0">
-            <!-- Explicit rows (Auto header / * spacer / Auto footer), not a DockPanel
-                 last-child-fill, so the footer buttons are unambiguously pinned to the
-                 bottom regardless of how much space the middle (future nav) area takes. -->
+            <!-- Explicit rows (Auto header / * nav / Auto footer), not a DockPanel
+                 last-child-fill, so the footer is unambiguously pinned to the
+                 bottom regardless of how much space the nav sections take. -->
             <Grid Margin="16">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -38,31 +44,40 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0">
-                    <TextBlock Text="{x:Static res:Strings.AppTitle}"
-                               FontSize="22" FontWeight="Bold"
-                               Foreground="{DynamicResource FolioPrimaryBrush}" />
-                    <TextBlock Text="{Binding FullName}"
-                               Foreground="{DynamicResource FolioTextBrush}"
-                               TextWrapping="Wrap"
-                               Margin="0,4,0,0" />
+                    <TextBlock Text="{x:Static res:Strings.AppTitle}" Style="{StaticResource FolioBrandTitleTextStyle}" />
+                    <TextBlock Text="{x:Static res:Strings.ShellBrandSubtitle}"
+                               Style="{StaticResource FolioVersalitasLabelTextStyle}"
+                               Margin="0,2,0,0" />
                 </StackPanel>
 
+                <!-- Two labeled sections, written out by hand — a future section
+                     (Reportes, Administración) copies this exact block; sections
+                     with no real pages yet are never shown as dead links. -->
                 <StackPanel Grid.Row="1" Margin="0,24,0,0">
+                    <TextBlock Text="{x:Static res:Strings.ShellSectionGeneral}"
+                               Style="{StaticResource FolioSectionLabelTextStyle}"
+                               Margin="10,0,0,6" />
                     <ui:Button Content="{x:Static res:Strings.NavWelcome}"
                                Icon="{ui:SymbolIcon Home24}"
                                Command="{Binding NavigateToWelcomeCommand}"
-                               Margin="0,0,0,4">
+                               Margin="0,0,0,16">
                         <ui:Button.Style>
                             <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource NavButtonStyle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding CurrentPage}" Value="{x:Static vm:ShellPage.Welcome}">
-                                        <Setter Property="Background" Value="{DynamicResource FolioPrimaryBrush}" />
-                                        <Setter Property="Foreground" Value="{DynamicResource FolioSurfaceBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource FolioRowSelectedBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource FolioTitleBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioTitleBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </ui:Button.Style>
                     </ui:Button>
+
+                    <TextBlock Text="{x:Static res:Strings.ShellSectionContabilidad}"
+                               Style="{StaticResource FolioSectionLabelTextStyle}"
+                               Margin="10,0,0,6" />
                     <ui:Button Content="{x:Static res:Strings.NavChartOfAccounts}"
                                Icon="{ui:SymbolIcon Folder24}"
                                Command="{Binding NavigateToChartOfAccountsCommand}">
@@ -70,8 +85,10 @@
                             <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource NavButtonStyle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding CurrentPage}" Value="{x:Static vm:ShellPage.ChartOfAccounts}">
-                                        <Setter Property="Background" Value="{DynamicResource FolioPrimaryBrush}" />
-                                        <Setter Property="Foreground" Value="{DynamicResource FolioSurfaceBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource FolioRowSelectedBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource FolioTitleBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioTitleBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -79,30 +96,38 @@
                     </ui:Button>
                 </StackPanel>
 
-                <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <ui:Button Icon="{ui:SymbolIcon WeatherSunny24}"
-                               Command="{Binding ToggleThemeCommand}"
-                               Appearance="Transparent"
-                               ToolTip="{x:Static res:Strings.ShellToggleTheme}"
-                               Width="36" Height="36"
-                               Padding="0"
-                               Margin="0,0,8,0" />
+                <StackPanel Grid.Row="2">
+                    <TextBlock Text="{Binding FullName}"
+                               Style="{StaticResource FolioBodyTextStyle}"
+                               FontWeight="Bold"
+                               TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Role, Converter={StaticResource UserRoleDisplay}}" Style="{StaticResource FolioSecondaryTextStyle}" Margin="0,0,0,10" />
 
-                    <ui:Button Content="{x:Static res:Strings.ShellSignOut}"
-                               Icon="{ui:SymbolIcon SignOut24}"
-                               Command="{Binding SignOutCommand}"
-                               Appearance="Transparent"
-                               VerticalAlignment="Center">
-                        <ui:Button.Style>
-                            <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Foreground" Value="{DynamicResource FolioErrorBrush}" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ui:Button.Style>
-                    </ui:Button>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Icon="{ui:SymbolIcon WeatherSunny24}"
+                                   Command="{Binding ToggleThemeCommand}"
+                                   Style="{StaticResource FolioSecondaryButtonStyle}"
+                                   ToolTip="{x:Static res:Strings.ShellToggleTheme}"
+                                   Width="38" Height="38"
+                                   Padding="0"
+                                   Margin="0,0,8,0" />
+
+                        <ui:Button Content="{x:Static res:Strings.ShellSignOut}"
+                                   Icon="{ui:SymbolIcon SignOut24}"
+                                   Command="{Binding SignOutCommand}"
+                                   VerticalAlignment="Center">
+                            <ui:Button.Style>
+                                <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource FolioSecondaryButtonStyle}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource FolioNegativeBrush}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource FolioNegativeBrush}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:Button.Style>
+                        </ui:Button>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>

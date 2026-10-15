@@ -4,49 +4,47 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:res="clr-namespace:Folio.Desktop.Resources"
              xmlns:conv="clr-namespace:Folio.Desktop.Converters"
-             Background="{DynamicResource FolioBackgroundBrush}">
+             xmlns:controls="clr-namespace:Folio.Desktop.Controls"
+             Background="{DynamicResource FolioPaperBrush}">
     <UserControl.Resources>
         <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
     </UserControl.Resources>
 
     <Grid>
-        <Border Background="{DynamicResource FolioSurfaceBrush}"
-                CornerRadius="8"
-                Padding="40"
-                Width="380"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
+        <controls:OffsetShadowCard Width="380" Padding="40" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <TextBlock Text="{x:Static res:Strings.AppTitle}"
-                           FontSize="38" FontWeight="Bold"
-                           Foreground="{DynamicResource FolioPrimaryBrush}"
+                           Style="{StaticResource FolioBrandTitleTextStyle}"
+                           FontSize="38"
                            HorizontalAlignment="Center" />
                 <TextBlock Text="{x:Static res:Strings.AppSubtitle}"
-                           FontSize="13"
-                           Foreground="{DynamicResource FolioTextBrush}"
+                           Style="{StaticResource FolioSecondaryTextStyle}"
                            HorizontalAlignment="Center"
                            Margin="0,2,0,28" />
 
-                <TextBlock Text="{x:Static res:Strings.LoginUsername}" Margin="0,0,0,4" />
+                <TextBlock Text="{x:Static res:Strings.LoginUsername}" Style="{StaticResource FolioBodyTextStyle}" Margin="0,0,0,4" />
                 <ui:TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                            FontFamily="{DynamicResource FolioBodyFontFamily}"
                             Margin="0,0,0,16" />
 
-                <TextBlock Text="{x:Static res:Strings.LoginPassword}" Margin="0,0,0,4" />
+                <TextBlock Text="{x:Static res:Strings.LoginPassword}" Style="{StaticResource FolioBodyTextStyle}" Margin="0,0,0,4" />
                 <ui:PasswordBox Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                FontFamily="{DynamicResource FolioBodyFontFamily}"
                                 Margin="0,0,0,8" />
 
                 <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="{DynamicResource FolioErrorBrush}"
+                           Foreground="{DynamicResource FolioNegativeBrush}"
+                           FontFamily="{DynamicResource FolioBodyFontFamily}"
                            TextWrapping="Wrap"
                            Margin="0,0,0,8" />
 
                 <ui:Button Content="{x:Static res:Strings.LoginSignIn}"
                            Command="{Binding SignInCommand}"
                            IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
-                           Appearance="Primary"
+                           Style="{StaticResource FolioPrimaryButtonStyle}"
                            HorizontalAlignment="Stretch"
                            Margin="0,8,0,0" />
             </StackPanel>
-        </Border>
+        </controls:OffsetShadowCard>
     </Grid>
 </UserControl>

@@ -1,11 +1,10 @@
 <UserControl x:Class="Folio.Desktop.Views.WelcomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Background="{DynamicResource FolioBackgroundBrush}">
-        <TextBlock Text="{Binding Greeting}"
-                   FontSize="24"
-                   Foreground="{DynamicResource FolioTextBrush}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center" />
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Folio.Desktop.Controls">
+    <Grid Background="{DynamicResource FolioPaperBrush}">
+        <StackPanel VerticalAlignment="Top">
+            <controls:PageHeaderControl Title="{Binding Greeting}" CompanyName="{Binding CompanyName}" />
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -11,16 +11,21 @@
     </UserControl.Resources>
 
     <StackPanel>
-        <TextBlock Text="{x:Static res:Strings.AccountFormCode}" Margin="0,0,0,4" />
+        <TextBlock Text="{x:Static res:Strings.AccountFormCode}" Style="{StaticResource FolioSecondaryTextStyle}" Margin="0,0,0,4" />
         <ui:TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}"
                     IsEnabled="{Binding IsCodeEditable}"
+                    FontFamily="{DynamicResource FolioMonoFontFamily}"
+                    Foreground="{DynamicResource FolioAccentBrush}"
                     Margin="0,0,0,12" />
 
-        <TextBlock Text="{x:Static res:Strings.AccountFormName}" Margin="0,0,0,4" />
-        <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
+        <TextBlock Text="{x:Static res:Strings.AccountFormName}" Style="{StaticResource FolioSecondaryTextStyle}" Margin="0,0,0,4" />
+        <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                    FontFamily="{DynamicResource FolioBodyFontFamily}"
+                    Margin="0,0,0,12" />
 
-        <TextBlock Text="{x:Static res:Strings.AccountFormType}" Margin="0,0,0,4" />
-        <ComboBox ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type}" Margin="0,0,0,12">
+        <TextBlock Text="{x:Static res:Strings.AccountFormType}" Style="{StaticResource FolioSecondaryTextStyle}" Margin="0,0,0,4" />
+        <ComboBox ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type}"
+                  FontFamily="{DynamicResource FolioBodyFontFamily}" Margin="0,0,0,12">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={StaticResource AccountTypeDisplay}}" />
@@ -28,8 +33,9 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <TextBlock Text="{x:Static res:Strings.AccountFormNormalBalance}" Margin="0,0,0,4" />
-        <ComboBox ItemsSource="{Binding NormalBalances}" SelectedItem="{Binding NormalBalance}" Margin="0,0,0,12">
+        <TextBlock Text="{x:Static res:Strings.AccountFormNormalBalance}" Style="{StaticResource FolioSecondaryTextStyle}" Margin="0,0,0,4" />
+        <ComboBox ItemsSource="{Binding NormalBalances}" SelectedItem="{Binding NormalBalance}"
+                  FontFamily="{DynamicResource FolioBodyFontFamily}" Margin="0,0,0,12">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={StaticResource NormalBalanceDisplay}}" />
@@ -39,17 +45,20 @@
 
         <CheckBox Content="{x:Static res:Strings.AccountFormIsPostable}"
                   IsChecked="{Binding IsPostable}"
+                  FontFamily="{DynamicResource FolioBodyFontFamily}"
                   Margin="0,0,0,12" />
 
-        <TextBlock Text="{x:Static res:Strings.AccountFormDescription}" Margin="0,0,0,4" />
+        <TextBlock Text="{x:Static res:Strings.AccountFormDescription}" Style="{StaticResource FolioSecondaryTextStyle}" Margin="0,0,0,4" />
         <ui:TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                    FontFamily="{DynamicResource FolioBodyFontFamily}"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"
                     Height="60"
                     Margin="0,0,0,12" />
 
         <TextBlock Text="{Binding ErrorMessage}"
-                   Foreground="{DynamicResource FolioErrorBrush}"
+                   Foreground="{DynamicResource FolioNegativeBrush}"
+                   FontFamily="{DynamicResource FolioBodyFontFamily}"
                    TextWrapping="Wrap" />
     </StackPanel>
 </UserControl>

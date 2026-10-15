@@ -4,212 +4,451 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:res="clr-namespace:Folio.Desktop.Resources"
              xmlns:conv="clr-namespace:Folio.Desktop.Converters"
+             xmlns:controls="clr-namespace:Folio.Desktop.Controls"
              xmlns:vm="clr-namespace:Folio.Desktop.ViewModels">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <conv:NullToVisibilityConverter x:Key="NullToVisibility" />
-        <conv:AccountTypeDisplayConverter x:Key="AccountTypeDisplay" />
-        <conv:NormalBalanceDisplayConverter x:Key="NormalBalanceDisplay" />
+        <conv:EnumToBooleanConverter x:Key="EnumToBoolean" />
+
+        <!-- Small-caps café label above each detail-panel block ("CUENTA T", ...). -->
+        <Style x:Key="DetailBlockLabelStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource FolioVersalitasLabelTextStyle}">
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <!-- Debe / Haber headings inside the Cuenta T. -->
+        <Style x:Key="TAccountSideLabelStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource FolioBodyTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource FolioTitleBrush}" />
+        </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="{DynamicResource FolioPaperBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Text="{x:Static res:Strings.ChartOfAccountsTitle}"
-                   FontSize="22" FontWeight="Bold"
-                   Foreground="{DynamicResource FolioPrimaryBrush}"
-                   Margin="0,0,0,12" />
+        <!-- Page header: company + title on the left, search and the primary
+             action on the right (wraps under the title on a narrow window). -->
+        <controls:PageHeaderControl Grid.Row="0"
+                                    Title="{x:Static res:Strings.ChartOfAccountsTitle}"
+                                    CompanyName="{Binding CompanyName}">
+            <controls:PageHeaderControl.HeaderActions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <ui:TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                PlaceholderText="{x:Static res:Strings.ChartOfAccountsSearchPlaceholder}"
+                                Icon="{ui:SymbolIcon Search24}"
+                                FontFamily="{DynamicResource FolioBodyFontFamily}"
+                                Width="260"
+                                Height="40"
+                                VerticalContentAlignment="Center"
+                                Margin="0,0,10,0" />
+                    <ui:Button Content="{x:Static res:Strings.ChartOfAccountsAddRoot}"
+                               Icon="{ui:SymbolIcon Add24}"
+                               Command="{Binding AddRootAccountCommand}"
+                               Style="{StaticResource FolioPrimaryButtonStyle}" />
+                </StackPanel>
+            </controls:PageHeaderControl.HeaderActions>
+        </controls:PageHeaderControl>
 
-        <!-- A WrapPanel, not a horizontal StackPanel: at a narrower window width the
-             search box and every action button (Add child / Edit / Activate-Deactivate
-             / Delete disable themselves via the matching command's CanExecute when
-             nothing is selected) wrap onto a second line instead of being clipped. -->
-        <WrapPanel Grid.Row="1" Margin="0,0,0,12">
-            <ui:TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                        PlaceholderText="{x:Static res:Strings.ChartOfAccountsSearchPlaceholder}"
-                        Width="260"
-                        Margin="0,0,16,8" />
-
-            <ui:Button Content="{x:Static res:Strings.ChartOfAccountsAddRoot}"
-                       Icon="{ui:SymbolIcon Add24}"
-                       Command="{Binding AddRootAccountCommand}"
-                       Margin="0,0,8,8" />
-            <ui:Button Content="{x:Static res:Strings.ChartOfAccountsAddChild}"
-                       Icon="{ui:SymbolIcon Add24}"
-                       Command="{Binding AddChildAccountCommand}"
-                       Margin="0,0,8,8" />
-            <ui:Button Content="{x:Static res:Strings.ChartOfAccountsEdit}"
-                       Icon="{ui:SymbolIcon Edit24}"
-                       Command="{Binding EditAccountCommand}"
-                       Margin="0,0,8,8" />
-
-            <ui:Button Content="{x:Static res:Strings.ChartOfAccountsDeactivate}"
-                       Icon="{ui:SymbolIcon Power24}"
-                       Command="{Binding ToggleActiveCommand}"
-                       Margin="0,0,8,8">
-                <ui:Button.Style>
-                    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedNode.IsActive}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:Button.Style>
-            </ui:Button>
-            <ui:Button Content="{x:Static res:Strings.ChartOfAccountsActivate}"
-                       Icon="{ui:SymbolIcon Power24}"
-                       Command="{Binding ToggleActiveCommand}"
-                       Margin="0,0,8,8">
-                <ui:Button.Style>
-                    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedNode.IsActive}" Value="False">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:Button.Style>
-            </ui:Button>
-
-            <ui:Button Content="{x:Static res:Strings.ChartOfAccountsDelete}"
-                       Icon="{ui:SymbolIcon Delete24}"
-                       Command="{Binding DeleteAccountCommand}"
-                       Margin="0,0,0,8" />
-        </WrapPanel>
-
-        <TextBlock Grid.Row="2"
+        <TextBlock Grid.Row="1"
                    Text="{Binding ErrorMessage}"
-                   Foreground="{DynamicResource FolioErrorBrush}"
+                   Style="{StaticResource FolioBodyTextStyle}"
+                   Foreground="{DynamicResource FolioNegativeBrush}"
                    TextWrapping="Wrap"
-                   Margin="0,0,0,12"
+                   Margin="0,-8,0,16"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibility}}" />
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" MinWidth="320" MaxWidth="460" />
             </Grid.ColumnDefinitions>
 
-            <TreeView Grid.Column="0"
-                      ItemsSource="{Binding RootNodes}"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      SelectedItemChanged="OnTreeViewSelectedItemChanged"
-                      Margin="0,0,16,0">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type vm:AccountTreeNodeViewModel}" ItemsSource="{Binding Children}">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0">
-                                <ui:SymbolIcon.Style>
-                                    <Style TargetType="{x:Type ui:SymbolIcon}">
-                                        <Setter Property="Symbol" Value="Folder24" />
+            <!-- ============ Left: type tabs, ledger tree, balance footnote ============ -->
+            <Grid Grid.Column="0" Margin="0,0,32,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Six mutually exclusive filter tabs: RadioButtons sharing a
+                     GroupName, each two-way bound to SelectedTypeFilter through
+                     EnumToBooleanConverter (ADR-0014). -->
+                <WrapPanel Grid.Row="0" Margin="0,0,0,14">
+                    <RadioButton GroupName="AccountTypeTabs"
+                                 Style="{StaticResource FolioTabFilterButtonStyle}"
+                                 Content="{Binding TabAllLabel}"
+                                 IsChecked="{Binding SelectedTypeFilter, Converter={StaticResource EnumToBoolean}, ConverterParameter={x:Static vm:AccountTypeFilter.All}}" />
+                    <RadioButton GroupName="AccountTypeTabs"
+                                 Style="{StaticResource FolioTabFilterButtonStyle}"
+                                 Content="{x:Static res:Strings.ChartOfAccountsTabAsset}"
+                                 IsChecked="{Binding SelectedTypeFilter, Converter={StaticResource EnumToBoolean}, ConverterParameter={x:Static vm:AccountTypeFilter.Asset}}" />
+                    <RadioButton GroupName="AccountTypeTabs"
+                                 Style="{StaticResource FolioTabFilterButtonStyle}"
+                                 Content="{x:Static res:Strings.ChartOfAccountsTabLiability}"
+                                 IsChecked="{Binding SelectedTypeFilter, Converter={StaticResource EnumToBoolean}, ConverterParameter={x:Static vm:AccountTypeFilter.Liability}}" />
+                    <RadioButton GroupName="AccountTypeTabs"
+                                 Style="{StaticResource FolioTabFilterButtonStyle}"
+                                 Content="{x:Static res:Strings.ChartOfAccountsTabEquity}"
+                                 IsChecked="{Binding SelectedTypeFilter, Converter={StaticResource EnumToBoolean}, ConverterParameter={x:Static vm:AccountTypeFilter.Equity}}" />
+                    <RadioButton GroupName="AccountTypeTabs"
+                                 Style="{StaticResource FolioTabFilterButtonStyle}"
+                                 Content="{x:Static res:Strings.ChartOfAccountsTabRevenue}"
+                                 IsChecked="{Binding SelectedTypeFilter, Converter={StaticResource EnumToBoolean}, ConverterParameter={x:Static vm:AccountTypeFilter.Revenue}}" />
+                    <RadioButton GroupName="AccountTypeTabs"
+                                 Style="{StaticResource FolioTabFilterButtonStyle}"
+                                 Content="{x:Static res:Strings.ChartOfAccountsTabCostOrExpense}"
+                                 IsChecked="{Binding SelectedTypeFilter, Converter={StaticResource EnumToBoolean}, ConverterParameter={x:Static vm:AccountTypeFilter.CostOrExpense}}" />
+                </WrapPanel>
+
+                <TreeView Grid.Row="1"
+                          ItemsSource="{Binding RootNodes}"
+                          ItemContainerStyle="{StaticResource FolioLedgerTreeViewItemStyle}"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          Padding="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          SelectedItemChanged="OnTreeViewSelectedItemChanged">
+                    <TreeView.ItemTemplate>
+                        <!-- One ledger row: code · name [· inactiva] · dotted leader · amount. -->
+                        <HierarchicalDataTemplate DataType="{x:Type vm:AccountTreeNodeViewModel}" ItemsSource="{Binding Children}">
+                            <Grid Margin="0,9">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="64" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" MinWidth="16" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{Binding Code}" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource FolioCodeTextStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                    <Setter Property="Foreground" Value="{DynamicResource FolioTextSecondaryBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- Leaf: plain body text. Subgroup: bold. Root ("nivel 1"):
+                                     Fraunces in títulos green. Later triggers win, so the
+                                     inactive look is listed last and overrides the others. -->
+                                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource FolioLeafLevelTextStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPostable}" Value="False">
+                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsTopLevel}" Value="True">
+                                                    <Setter Property="FontFamily" Value="{DynamicResource FolioSerifFontFamily}" />
+                                                    <Setter Property="FontSize" Value="18" />
+                                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource FolioTitleBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                    <Setter Property="Foreground" Value="{DynamicResource FolioTextSecondaryBrush}" />
+                                                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <TextBlock Grid.Column="2"
+                                           Text="{x:Static res:Strings.ChartOfAccountsInactiveTag}"
+                                           FontSize="12"
+                                           FontStyle="Italic"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource FolioSecondaryTextStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <Rectangle Grid.Column="3" Style="{StaticResource FolioDottedLineStyle}" Margin="10,0,10,6" />
+
+                                <TextBlock Grid.Column="4" Text="{Binding Balance, StringFormat=N2}" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource FolioAmountTextStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPostable}" Value="False">
+                                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                    <Setter Property="Foreground" Value="{DynamicResource FolioTextSecondaryBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+
+                <!-- Accounting-equation footnote with the real check result. -->
+                <TextBlock Grid.Row="2"
+                           Style="{StaticResource FolioSecondaryTextStyle}"
+                           FontStyle="Italic"
+                           TextWrapping="Wrap"
+                           Margin="0,14,0,0">
+                    <Run Text="{x:Static res:Strings.ChartOfAccountsBalanceCheckLabel}" />
+                    <Run FontStyle="Normal" FontWeight="Bold">
+                        <Run.Style>
+                            <Style TargetType="{x:Type Run}">
+                                <Setter Property="Text" Value="" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding BalanceCheck.IsBalanced}" Value="True">
+                                        <Setter Property="Text" Value="✓" />
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioPositiveBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding BalanceCheck.IsBalanced}" Value="False">
+                                        <Setter Property="Text" Value="✗" />
+                                        <Setter Property="Foreground" Value="{DynamicResource FolioNegativeBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Run.Style>
+                    </Run>
+                </TextBlock>
+            </Grid>
+
+            <!-- ============ Right: account detail card ============ -->
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <controls:OffsetShadowCard VerticalAlignment="Top" Padding="26">
+                    <StackPanel>
+                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsNoSelectionHint}"
+                                   Style="{StaticResource FolioSecondaryTextStyle}"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding SelectedDetail, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert}" />
+
+                        <StackPanel Visibility="{Binding SelectedDetail, Converter={StaticResource NullToVisibility}}">
+
+                            <!-- Identity -->
+                            <TextBlock Text="{Binding SelectedDetailHeader}" Style="{StaticResource FolioCodeTextStyle}" />
+                            <TextBlock Text="{Binding SelectedDetail.Name}"
+                                       Style="{StaticResource FolioPageTitleTextStyle}"
+                                       FontSize="32"
+                                       TextWrapping="Wrap"
+                                       Margin="0,4,0,0" />
+                            <TextBlock Text="{Binding SelectedDetailSummary}"
+                                       Style="{StaticResource FolioBodyTextStyle}"
+                                       FontSize="14"
+                                       TextWrapping="Wrap"
+                                       Margin="0,8,0,20" />
+
+                            <!-- Cuenta T: Debe | Haber, then Saldo with the accounting
+                                 double underline (two stacked 1px borders — WPF has no
+                                 "border-style: double"). -->
+                            <TextBlock Text="{x:Static res:Strings.ChartOfAccountsCuentaT}"
+                                       Style="{StaticResource DetailBlockLabelStyle}"
+                                       HorizontalAlignment="Center" />
+                            <Border BorderBrush="{DynamicResource FolioTitleBrush}" BorderThickness="0,2,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0"
+                                            BorderBrush="{DynamicResource FolioTitleBrush}"
+                                            BorderThickness="0,0,2,0"
+                                            Padding="0,10,14,12">
+                                        <StackPanel>
+                                            <TextBlock Text="{x:Static res:Strings.ChartOfAccountsDebe}" Style="{StaticResource TAccountSideLabelStyle}" />
+                                            <TextBlock Text="{Binding SelectedDetail.DebitTotal, StringFormat=N2}"
+                                                       Style="{StaticResource FolioAmountTextStyle}"
+                                                       FontSize="18"
+                                                       HorizontalAlignment="Left"
+                                                       Margin="0,4,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="14,10,0,12">
+                                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsHaber}"
+                                                   Style="{StaticResource TAccountSideLabelStyle}"
+                                                   HorizontalAlignment="Right" />
+                                        <TextBlock Text="{Binding SelectedDetail.CreditTotal, StringFormat=N2}"
+                                                   Style="{StaticResource FolioAmountTextStyle}"
+                                                   FontSize="18"
+                                                   Margin="0,4,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource FolioLineBrush}" BorderThickness="0,1,0,0" Padding="0,10">
+                                <DockPanel>
+                                    <TextBlock Text="{x:Static res:Strings.ChartOfAccountsSaldo}"
+                                               FontFamily="{DynamicResource FolioSerifFontFamily}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource FolioTextBrush}"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding SelectedDetail.Balance, StringFormat=C2}"
+                                               Style="{StaticResource FolioAmountStrongTextStyle}"
+                                               FontSize="24"
+                                               Foreground="{DynamicResource FolioTitleBrush}" />
+                                </DockPanel>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource FolioTitleBrush}" BorderThickness="0,1,0,0" />
+                            <Border BorderBrush="{DynamicResource FolioTitleBrush}" BorderThickness="0,1,0,0" Margin="0,2,0,24" />
+
+                            <!-- Saldo por mes: six hand-drawn bars (no chart library — ADR-0014).
+                                 Heights are pre-computed by the ViewModel; the current month
+                                 uses the "acciones" green, the rest a paper tone. -->
+                            <DockPanel Margin="0,0,0,8">
+                                <TextBlock Text="{x:Static res:Strings.ChartOfAccountsLastSixMonths}"
+                                           DockPanel.Dock="Right"
+                                           FontFamily="{DynamicResource FolioSerifFontFamily}"
+                                           FontSize="13"
+                                           FontStyle="Italic"
+                                           Foreground="{DynamicResource FolioTextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:Strings.ChartOfAccountsBalanceByMonth}" Style="{StaticResource FolioVersalitasLabelTextStyle}" />
+                            </DockPanel>
+                            <Grid Height="64">
+                                <Rectangle Style="{StaticResource FolioDottedLineStyle}" StrokeDashArray="2,3" Stroke="{DynamicResource FolioLineBrush}" VerticalAlignment="Center" />
+                                <Border BorderBrush="{DynamicResource FolioTitleBrush}" BorderThickness="0,0,0,1" />
+                                <ItemsControl ItemsSource="{Binding MonthlyBalanceBars}" Margin="0,0,0,1">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MonthlyBalanceBarViewModel}">
+                                            <Rectangle Width="26" Height="{Binding Height}" VerticalAlignment="Bottom">
+                                                <Rectangle.Style>
+                                                    <Style TargetType="{x:Type Rectangle}">
+                                                        <Setter Property="Fill" Value="{DynamicResource FolioLineDottedBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCurrentMonth}" Value="True">
+                                                                <Setter Property="Fill" Value="{DynamicResource FolioActionBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Rectangle.Style>
+                                            </Rectangle>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding MonthlyBalanceBars}" Margin="0,4,0,24">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:MonthlyBalanceBarViewModel}">
+                                        <TextBlock Text="{Binding MonthAbbreviation}"
+                                                   FontFamily="{DynamicResource FolioMonoFontFamily}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource FolioTextSecondaryBrush}"
+                                                   HorizontalAlignment="Center" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Últimos asientos: "#108 Description ...... 245 300,00 D" -->
+                            <StackPanel Margin="0,0,0,24">
+                                <StackPanel.Style>
+                                    <Style TargetType="{x:Type StackPanel}">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsPostable}" Value="True">
-                                                <Setter Property="Symbol" Value="Document24" />
+                                            <DataTrigger Binding="{Binding RecentEntryRows.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </ui:SymbolIcon.Style>
-                            </ui:SymbolIcon>
-                            <TextBlock Text="{Binding Code}" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource FolioTextBrush}" Margin="0,0,6,0" />
-                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource FolioTextBrush}" />
+                                </StackPanel.Style>
+                                <TextBlock Text="{x:Static res:Strings.ChartOfAccountsRecentEntries}"
+                                           Style="{StaticResource FolioVersalitasLabelTextStyle}"
+                                           Margin="0,0,0,4" />
+                                <ItemsControl ItemsSource="{Binding RecentEntryRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RecentEntryRowViewModel}">
+                                            <Border BorderBrush="{DynamicResource FolioLineBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                                <DockPanel>
+                                                    <TextBlock DockPanel.Dock="Right"
+                                                               Style="{StaticResource FolioAmountTextStyle}"
+                                                               FontSize="14"
+                                                               Margin="10,0,0,0">
+                                                        <Run Text="{Binding Amount, Mode=OneWay, StringFormat=N2}" />
+                                                        <Run Text="{Binding Side, Mode=OneWay}" />
+                                                    </TextBlock>
+                                                    <TextBlock Style="{StaticResource FolioBodyTextStyle}" FontSize="14" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="#" FontFamily="{DynamicResource FolioMonoFontFamily}" Foreground="{DynamicResource FolioAccentBrush}" /><Run Text="{Binding Number, Mode=OneWay}" FontFamily="{DynamicResource FolioMonoFontFamily}" Foreground="{DynamicResource FolioAccentBrush}" />
+                                                        <Run Text="{Binding Description, Mode=OneWay}" />
+                                                    </TextBlock>
+                                                </DockPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Actions. Activate/Deactivate swap on the selection's state;
+                                 every command disables itself via CanExecute with no selection. -->
+                            <WrapPanel>
+                                <ui:Button Content="{x:Static res:Strings.ChartOfAccountsEdit}"
+                                           Command="{Binding EditAccountCommand}"
+                                           Style="{StaticResource FolioSecondaryButtonStyle}"
+                                           BorderBrush="{DynamicResource FolioTitleBrush}"
+                                           Foreground="{DynamicResource FolioTitleBrush}"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,8,8" />
+                                <ui:Button Content="{x:Static res:Strings.ChartOfAccountsAddChild}"
+                                           Command="{Binding AddChildAccountCommand}"
+                                           Style="{StaticResource FolioSecondaryButtonStyle}"
+                                           Margin="0,0,8,8" />
+                                <ui:Button Content="{x:Static res:Strings.ChartOfAccountsDeactivate}"
+                                           Command="{Binding ToggleActiveCommand}"
+                                           Margin="0,0,8,8">
+                                    <ui:Button.Style>
+                                        <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource FolioSecondaryButtonStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedNode.IsActive}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ui:Button.Style>
+                                </ui:Button>
+                                <ui:Button Content="{x:Static res:Strings.ChartOfAccountsActivate}"
+                                           Command="{Binding ToggleActiveCommand}"
+                                           Margin="0,0,8,8">
+                                    <ui:Button.Style>
+                                        <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource FolioSecondaryButtonStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedNode.IsActive}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ui:Button.Style>
+                                </ui:Button>
+                                <ui:Button Content="{x:Static res:Strings.ChartOfAccountsDelete}"
+                                           Command="{Binding DeleteAccountCommand}"
+                                           Style="{StaticResource FolioDestructiveButtonStyle}"
+                                           Margin="0,0,0,8" />
+                            </WrapPanel>
                         </StackPanel>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                        <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}" />
-                        <Setter Property="Opacity" Value="1" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                <Setter Property="Opacity" Value="0.5" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsSearchMatch}" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource FolioAccentBrush}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TreeView.ItemContainerStyle>
-            </TreeView>
-
-            <Border Grid.Column="1"
-                    Background="{DynamicResource FolioSurfaceBrush}"
-                    CornerRadius="8"
-                    Padding="20"
-                    VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock Text="{x:Static res:Strings.ChartOfAccountsNoSelectionHint}"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource FolioTextBrush}"
-                               Visibility="{Binding SelectedDetail, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert}" />
-
-                    <StackPanel Visibility="{Binding SelectedDetail, Converter={StaticResource NullToVisibility}}">
-                        <TextBlock Text="{Binding SelectedDetail.Name}"
-                                   FontSize="18" FontWeight="Bold"
-                                   Foreground="{DynamicResource FolioPrimaryBrush}"
-                                   TextWrapping="Wrap"
-                                   Margin="0,0,0,12" />
-
-                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsDetailCode}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource FolioTextBrush}" />
-                        <TextBlock Text="{Binding SelectedDetail.Code}" Foreground="{DynamicResource FolioTextBrush}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsDetailType}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource FolioTextBrush}" />
-                        <TextBlock Text="{Binding SelectedDetail.Type, Converter={StaticResource AccountTypeDisplay}}"
-                                   Foreground="{DynamicResource FolioTextBrush}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsDetailNormalBalance}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource FolioTextBrush}" />
-                        <TextBlock Text="{Binding SelectedDetail.NormalBalance, Converter={StaticResource NormalBalanceDisplay}}"
-                                   Foreground="{DynamicResource FolioTextBrush}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsDetailBalance}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource FolioTextBrush}" />
-                        <TextBlock Text="{Binding SelectedDetail.Balance, StringFormat=C2}"
-                                   Foreground="{DynamicResource FolioTextBrush}" Margin="0,0,0,10" />
-
-                        <TextBlock Text="{x:Static res:Strings.ChartOfAccountsDetailStatus}" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource FolioTextBrush}" />
-                        <TextBlock Foreground="{DynamicResource FolioTextBrush}" Margin="0,0,0,10">
-                            <TextBlock.Style>
-                                <Style TargetType="{x:Type TextBlock}">
-                                    <Setter Property="Text" Value="{x:Static res:Strings.ChartOfAccountsStatusInactive}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedDetail.IsActive}" Value="True">
-                                            <Setter Property="Text" Value="{x:Static res:Strings.ChartOfAccountsStatusActive}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
-                        <TextBlock Foreground="{DynamicResource FolioTextBrush}" Opacity="0.7">
-                            <TextBlock.Style>
-                                <Style TargetType="{x:Type TextBlock}">
-                                    <Setter Property="Text" Value="{x:Static res:Strings.ChartOfAccountsKindGroup}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedDetail.IsPostable}" Value="True">
-                                            <Setter Property="Text" Value="{x:Static res:Strings.ChartOfAccountsKindPostable}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
                     </StackPanel>
-                </StackPanel>
-            </Border>
+                </controls:OffsetShadowCard>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </UserControl>

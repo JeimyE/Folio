@@ -15,6 +15,11 @@ public sealed class DialogService(MainWindow mainWindow) : IDialogService
             Content = new AccountFormView { DataContext = viewModel },
             PrimaryButtonText = Strings.DialogSave,
             CloseButtonText = Strings.DialogCancel,
+            // ContentDialog already exposes these appearance properties directly —
+            // no need to re-template the control itself (ADR-0014) to match the
+            // "Libro mayor" primary/secondary button look.
+            PrimaryButtonAppearance = ControlAppearance.Primary,
+            CloseButtonAppearance = ControlAppearance.Secondary,
         };
 
         // ContentDialog's Closing event is synchronous, so it can't await a save
@@ -59,6 +64,10 @@ public sealed class DialogService(MainWindow mainWindow) : IDialogService
             Content = message,
             PrimaryButtonText = Strings.DialogConfirm,
             CloseButtonText = Strings.DialogCancel,
+            // This confirmation is always the destructive one today (delete) — a
+            // red Primary button, not green, for that specific action.
+            PrimaryButtonAppearance = ControlAppearance.Danger,
+            CloseButtonAppearance = ControlAppearance.Secondary,
         };
 
         var result = await dialog.ShowAsync();

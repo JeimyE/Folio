@@ -54,6 +54,15 @@ public partial class App : System.Windows.Application
                 rollingInterval: RollingInterval.Day)
             .CreateBootstrapLogger();
 
+        // Applies the saved theme (or the system one) globally — brand dictionary
+        // swap + WPF-UI accent — before the splash window is even constructed, so it
+        // opens directly in the right theme instead of flashing from light to dark
+        // once the real IThemeService (resolved from the Host below) re-applies it.
+        // ThemeService has no injected dependencies, so a throwaway instance here is
+        // safe; the Host-resolved singleton used by the rest of the app re-applies
+        // the same (already correct) theme a second time, redundant but harmless.
+        new ThemeService().ApplyStartupTheme();
+
         var splash = new SplashWindow();
         splash.Show();
 

@@ -7,23 +7,26 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
-        Background="#F7F3EA">
-    <Border BorderBrush="#3F6B4A" BorderThickness="1">
+        Background="{DynamicResource FolioPaperBrush}">
+    <!-- DynamicResource, not literal hex: the real theme (light or dark, read from
+         settings.json by App.xaml.cs before this window is constructed — see
+         ADR-0014) is already applied by the time this renders, so it opens directly
+         in the right theme instead of flashing from light to dark a moment later. -->
+    <Border BorderBrush="{DynamicResource FolioTitleBrush}" BorderThickness="1">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock Text="Folio"
-                       FontSize="40" FontWeight="Bold"
-                       Foreground="#3F6B4A"
-                       HorizontalAlignment="Center"/>
+                       Style="{StaticResource FolioBrandTitleTextStyle}"
+                       FontSize="40"
+                       HorizontalAlignment="Center" />
             <TextBlock Text="by Folivora Software"
-                       FontSize="13"
-                       Foreground="#2B2A27"
+                       Style="{StaticResource FolioSecondaryTextStyle}"
                        Margin="0,4,0,24"
-                       HorizontalAlignment="Center"/>
+                       HorizontalAlignment="Center" />
             <ProgressBar IsIndeterminate="True"
                          Width="180" Height="4"
-                         Foreground="#8B5E3C"
-                         Background="#FFFFFF"
-                         BorderThickness="0"/>
+                         Foreground="{DynamicResource FolioAccentBrush}"
+                         Background="{DynamicResource FolioSurfaceBrush}"
+                         BorderThickness="0" />
         </StackPanel>
     </Border>
 </Window>
