@@ -27,7 +27,10 @@ public sealed class SqliteInMemoryContextFactory : IDisposable
     public FolioDbContext CreateContext(SaveChangesInterceptor? interceptor = null)
     {
         var optionsBuilder = new DbContextOptionsBuilder<FolioDbContext>()
-            .UseSqlite(_connection);
+            .UseSqlite(_connection)
+            // A First/FirstOrDefault with no filter and no OrderBy returns an arbitrary
+            // row; in production it's only a logged warning, here it fails the test.
+            .ConfigureWarnings(warnings => warnings.Throw(CoreEventId.FirstWithoutOrderByAndFilterWarning));
 
         if (interceptor is not null)
         {

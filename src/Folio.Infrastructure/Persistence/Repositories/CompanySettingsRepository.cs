@@ -9,7 +9,10 @@ public sealed class CompanySettingsRepository(IDbContextFactory<FolioDbContext> 
     public async Task<CompanySettings?> GetAsync(CancellationToken cancellationToken = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        return await context.CompanySettings.FirstOrDefaultAsync(cancellationToken);
+        // Single, not First: there is exactly one company row (SPEC §2.2), so no
+        // ordering can matter — and a second row would be corrupt data that should
+        // fail loudly rather than be silently ignored.
+        return await context.CompanySettings.SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task AddAsync(CompanySettings settings, CancellationToken cancellationToken = default)
