@@ -48,6 +48,14 @@ this structure and other foundational decisions.
 dotnet test Folio.sln
 ```
 
+## Fonts
+
+The "Libro mayor" design system (`docs/adr/0014-libro-mayor-design-system.md`) embeds
+three OFL-licensed font families as app resources under
+`src/Folio.Desktop/Resources/Fonts/`: **Fraunces** (serif, titles), **Source Sans 3**
+(body/UI), and **IBM Plex Mono** (account codes and every monetary amount). Each
+family's own `OFL.txt` license ships alongside its font files in the same folder.
+
 ## License
 
 See [LICENSE](LICENSE).

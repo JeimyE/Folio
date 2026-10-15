@@ -30,4 +30,10 @@
     <ProjectReference Include="..\Folio.Infrastructure\Folio.Infrastructure.csproj" />
   </ItemGroup>
 
+  <!-- Fraunces, Source Sans 3 and IBM Plex Mono (OFL-licensed, see Resources/Fonts/*/OFL.txt
+       and README.md) embedded as app resources for the "Libro mayor" design system. -->
+  <ItemGroup>
+    <Resource Include="Resources/Fonts/**/*.ttf" />
+  </ItemGroup>
+
 </Project>
