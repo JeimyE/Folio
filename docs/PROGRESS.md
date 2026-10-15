@@ -365,3 +365,118 @@
 - App launched via `dotnet run --project src/Folio.Desktop`: Generic Host started
   cleanly (no errors in the Serilog log), the window opened, and the process stayed
   open and responsive; closed from this session afterward rather than left running.
+
+## M4.5 — "Libro mayor" design system (done)
+
+**Built:**
+- `src/Folio.Desktop/Resources/Theme/Folio.Light.xaml` / `Folio.Dark.xaml`: the new
+  token set from the mockup (paper, sidebar, surface, shadow, títulos, acciones,
+  café accent, text, lines, positive/negative), plus `FolioRowSelectedBrush` and
+  `FolioOnTitleBrush`. Old "Bosque" keys renamed with no aliases (ADR-0014).
+- `src/Folio.Desktop/Resources/Fonts/<Family>/`: Fraunces, Source Sans 3 and IBM Plex
+  Mono embedded as resources, each with its `OFL.txt`; README "Fonts" section.
+- `src/Folio.Desktop/Resources/Theme/`: `Folio.Typography.xaml`, `Folio.TextStyles.xaml`,
+  `Folio.ButtonStyles.xaml`, `Folio.CardStyles.xaml`, `Folio.TreeStyles.xaml` (the
+  ledger `TreeViewItem` template), all merged once in `App.xaml`.
+- `src/Folio.Desktop/Controls/`: `OffsetShadowCard` (card with a 4px offset shadow)
+  and `PageHeaderControl` (company name, serif title, green rule, actions slot).
+- Data for the detail panel, all real SQL: `IAccountRepository.GetAllMovementTotalsAsync`
+  (every tree row's balance in one `GROUP BY`), `GetMonthlyMovementTotalsAsync`,
+  `GetRecentEntriesAsync`; `AccountDetailDto` gained `DebitTotal`/`CreditTotal`,
+  `MonthlyBalances` (closing balance at the end of each of the last 6 months,
+  accumulated from the start of the account's history) and `RecentEntries`;
+  `ChartOfAccountsService` gained `GetBalanceCheckAsync` and an `IClock` dependency.
+- `src/Folio.Application/Company/`: `ICompanyContextService` / `CompanyContextService`
+  for the company name in page headers.
+- User role shown in the sidebar footer: `AuthenticationResult` → `UserSignedInMessage`
+  → `ShellViewModel.Role` → `UserRoleDisplayConverter`.
+- Chart of accounts: six type-filter tabs (`AccountTypeFilter`, `EnumToBooleanConverter`),
+  ledger rows (mono café code, dotted leader, mono amount, serif level-1 names,
+  struck-through inactive accounts with an "inactiva" tag), a detail card with a
+  Cuenta T, a 6-month bar chart, recent entries and bordered actions, and the
+  "Activo = Pasivo + Patrimonio ✓/✗" footnote.
+- Restyled: `SplashWindow`, `LoginView`, `ShellView` (sections "General" with Inicio
+  and "Contabilidad" with Catálogo de cuentas, active item with a green left edge),
+  `WelcomeView`, `AccountFormView`, `DialogService` (Primary/Danger appearances).
+- Startup: `App.xaml.cs` applies the saved theme before creating the splash, so it
+  opens in the right theme with no flash.
+- Tests: `AccountMonthlyBalanceIntegrationTests` (month grouping, `through` cutoff,
+  a movement before the window already shown in the first month, a credit-normal
+  group account aggregating its leaves), `AccountRecentEntriesIntegrationTests`,
+  Debe/Haber in `ChartOfAccountsBalanceIntegrationTests`, `GetBalanceCheckAsync`
+  unit tests, converter tests (`EnumToBoolean`, `UpperCase`, `UserRoleDisplay`), and
+  type-filter / count / balance-check tests in `ChartOfAccountsViewModelTests`.
+- ADR-0014.
+
+**Key design decisions** (details in ADR-0014):
+- One accent green ("títulos") for WPF-UI, the primary button and selection. The only
+  exception is the ledger tree's selected row (subtle "papel oscuro").
+- Per-month balance = closing balance accumulated over the account's whole history,
+  carried forward through months with no activity.
+- The equation check counts the not-yet-closed period result (Revenue − Cost −
+  Expense) as part of equity. Without it, the check would fail on any real book.
+  This is a change from the approved plan, which compared only Liabilities + Equity.
+- Hand-drawn bar chart (no LiveCharts), no letter-spacing (caps-only approximation),
+  dotted line and double underline built from basic shapes.
+
+**Fixed along the way:**
+- `PageHeaderControl` set `DataContext = this` in its constructor. That made the
+  page's own bindings on it (`Title="{Binding Greeting}"`) and the search box in its
+  actions slot resolve against the control instead of the page ViewModel. It now uses
+  `ElementName` bindings.
+
+**Known limitations / deferred on purpose:**
+- Letter-spacing in the small caps labels is approximate (WPF has no tracking).
+- `FolioRowSelectedBrush` in dark mode (`#2A3129`) is an estimate. It needs a visual
+  check.
+- The six-month window is calendar months ending today, not fiscal periods.
+- Sections "Reportes"/"Administración" from the mockup are not shown until they have
+  real pages. There are no dead links.
+- As with M3/M4, the UI could not be inspected visually from this environment.
+  Verification relied on the automated tests, a clean Serilog startup log and the
+  process staying responsive. Jeimy should go through the visual checklist in light
+  and dark mode before signing off.
+
+**Fixed after Jeimy's review:**
+- **Type filter tabs didn't filter.** The tabs pass `ConverterParameter={x:Static vm:AccountTypeFilter.X}`
+  (the enum value itself), but `EnumToBooleanConverter` only accepted a string name,
+  so `Convert` always returned `false` and `ConvertBack` always `Binding.DoNothing`:
+  the RadioButton toggled its own look, but `SelectedTypeFilter` never changed. The
+  converter now accepts the enum value or its name; two converter tests reproduce
+  exactly what the XAML sends (they failed before the fix).
+- **The tree overstated Activo by twice the accumulated depreciation.** `GetTreeAsync`
+  summed each child's balance already signed by the child's own normal balance, so a
+  contra-account (credit-normal *Depreciación acumulada* under debit-normal *Activo*)
+  was added instead of subtracted. The detail panel was already right. Each node now
+  carries its raw debit/credit totals up, and every level signs them with its own
+  normal balance (`GetTreeAsync_ContraAccountUnderDebitNormalGroup_ReducesGroupBalance`).
+- **Unrealistic demo data.** `DemoEntriesSeeder` accrued salaries, CCSS, VAT and
+  supplier invoices but never paid them, had ~₡180k/month in sales against ~₡2.8M in
+  expenses, never expensed inventory, and depreciated a fixed asset that was never
+  bought. It now pays suppliers, the CCSS (employer 26.33% + employee 10.67%
+  withheld) and the D-104 VAT return the following month, pays net salaries at month
+  end, records weekly sales (~₡4.9M net/month), cost of sales from inventory, the
+  equipment bought with the loan, and monthly loan installments with interest.
+  `DemoSeedFinancialsIntegrationTests` verifies profit > 0, Activo > Pasivo and the
+  accounting equation on the seeded data. For the 12 months, before → after:
+  Activo ₡8.11M → ₡15.35M, Pasivo ₡33.32M → ₡5.73M, Patrimonio ₡5.00M → ₡5.00M,
+  Ingresos ₡2.05M → ₡59.32M, Costos ₡0 → ₡19.18M, Gastos ₡33.33M → ₡35.51M,
+  result −₡31.29M → +₡4.63M (7.8% margin).
+- **Accounting "today" was the UTC date.** From 6 p.m. in Costa Rica the seed dated
+  entries tomorrow (and near a month-end, the seed window and the six-month chart
+  shifted a month ahead). `IClock.TodayInCostaRica()` (`src/Folio.Domain/Common/ClockExtensions.cs`)
+  is now the only place that computes the accounting date; ADR-0005 updated.
+- **EF Core warning "First/FirstOrDefault without OrderBy and filter"** from
+  `CompanySettingsRepository.GetAsync`: now `SingleOrDefaultAsync` (there is exactly
+  one company row). The test `SqliteInMemoryContextFactory` turns that warning into
+  an exception, so every Infrastructure test guards against it coming back.
+- Still deferred: income tax (2.1.04) is not accrued; that belongs to the year-end
+  close in a later milestone.
+
+**Verification:**
+- `dotnet build Folio.sln -warnaserror` → 0 warnings, 0 errors.
+- `dotnet test Folio.sln` → 116 Domain + 32 Application + 35 Infrastructure + 44
+  Desktop = 227 tests pass.
+- App launched via `dotnet run --project src/Folio.Desktop`: Host started with no
+  errors in the log, the window opened and responded, and it was closed from this
+  session afterwards.
