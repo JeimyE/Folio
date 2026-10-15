@@ -50,6 +50,6 @@ public sealed class AuthenticationService(
         await userRepository.UpdateAsync(user, cancellationToken);
 
         currentUserSession.SignIn(user.Id);
-        return AuthenticationResult.Success(user.Id, user.FullName);
+        return AuthenticationResult.Success(user.Id, user.FullName, user.Role);
     }
 }

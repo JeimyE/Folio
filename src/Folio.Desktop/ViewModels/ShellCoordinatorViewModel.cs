@@ -31,7 +31,7 @@ public sealed partial class ShellCoordinatorViewModel :
     public void Receive(UserSignedInMessage message)
     {
         var shell = _serviceProvider.GetRequiredService<ShellViewModel>();
-        shell.Initialize(message.FullName);
+        shell.Initialize(message.FullName, message.Role);
         CurrentViewModel = shell;
     }
 

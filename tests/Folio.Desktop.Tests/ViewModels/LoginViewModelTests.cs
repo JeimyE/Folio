@@ -3,6 +3,7 @@ using Folio.Application.Authentication;
 using Folio.Desktop.Messages;
 using Folio.Desktop.ViewModels;
 using Folio.Domain.Common;
+using Folio.Domain.Enums;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
@@ -39,13 +40,14 @@ public class LoginViewModelTests
         _sut.Username = "admin";
         _sut.Password = "Folio2026!";
         _authenticationService.LoginAsync("admin", "Folio2026!", Arg.Any<CancellationToken>())
-            .Returns(AuthenticationResult.Success(userId, "Administradora del Sistema"));
+            .Returns(AuthenticationResult.Success(userId, "Administradora del Sistema", UserRole.Administrador));
 
         await _sut.SignInCommand.ExecuteAsync(null);
 
         captured.Should().NotBeNull();
         captured!.UserId.Should().Be(userId);
         captured.FullName.Should().Be("Administradora del Sistema");
+        captured.Role.Should().Be(UserRole.Administrador);
     }
 
     [Fact]
@@ -98,7 +100,7 @@ public class LoginViewModelTests
     {
         _sut.Password = "Folio2026!";
         _authenticationService.LoginAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(AuthenticationResult.Success(Guid.NewGuid(), "Ana"));
+            .Returns(AuthenticationResult.Success(Guid.NewGuid(), "Ana", UserRole.Contador));
 
         await _sut.SignInCommand.ExecuteAsync(null);
 

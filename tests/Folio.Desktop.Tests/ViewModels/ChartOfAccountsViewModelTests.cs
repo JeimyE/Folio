@@ -1,4 +1,5 @@
 using Folio.Application.ChartOfAccounts;
+using Folio.Application.Company;
 using Folio.Desktop.Dialogs;
 using Folio.Desktop.ViewModels;
 using Folio.Domain.Enums;
@@ -12,19 +13,25 @@ public class ChartOfAccountsViewModelTests
 {
     private readonly IChartOfAccountsService _chartOfAccountsService = Substitute.For<IChartOfAccountsService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
+    private readonly ICompanyContextService _companyContextService = Substitute.For<ICompanyContextService>();
     private readonly ChartOfAccountsViewModel _sut;
 
     public ChartOfAccountsViewModelTests()
     {
-        _sut = new ChartOfAccountsViewModel(_chartOfAccountsService, _dialogService);
+        _sut = new ChartOfAccountsViewModel(_chartOfAccountsService, _dialogService, _companyContextService);
     }
 
     private static AccountTreeItemDto Node(
-        Guid id, string code, string name, bool isPostable, bool isActive = true, params AccountTreeItemDto[] children) => new()
+        Guid id, string code, string name, bool isPostable, bool isActive = true, params AccountTreeItemDto[] children) =>
+        Node(id, code, name, AccountType.Asset, isPostable, isActive, children);
+
+    private static AccountTreeItemDto Node(
+        Guid id, string code, string name, AccountType type, bool isPostable, bool isActive = true, params AccountTreeItemDto[] children) => new()
     {
         Id = id,
         Code = code,
         Name = name,
+        Type = type,
         IsPostable = isPostable,
         IsActive = isActive,
         HasChildren = children.Length > 0,
@@ -344,5 +351,72 @@ public class ChartOfAccountsViewModelTests
 
         _sut.SelectedNode.Should().BeNull();
         _sut.SelectedDetail.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task OnSelectedTypeFilterChanged_Asset_HidesBranchesOfOtherTypes()
+    {
+        var assetId = Guid.NewGuid();
+        var liabilityId = Guid.NewGuid();
+        var tree = new[]
+        {
+            Node(assetId, "1", "Activo", AccountType.Asset, isPostable: false),
+            Node(liabilityId, "2", "Pasivo", AccountType.Liability, isPostable: false),
+        };
+        _chartOfAccountsService.GetTreeAsync(Arg.Any<CancellationToken>()).Returns(tree);
+        await _sut.InitializeAsync();
+
+        _sut.SelectedTypeFilter = AccountTypeFilter.Asset;
+
+        _sut.RootNodes.First(n => n.Id == assetId).IsVisible.Should().BeTrue();
+        _sut.RootNodes.First(n => n.Id == liabilityId).IsVisible.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task OnSelectedTypeFilterChanged_All_ShowsEveryType()
+    {
+        var assetId = Guid.NewGuid();
+        var liabilityId = Guid.NewGuid();
+        var tree = new[]
+        {
+            Node(assetId, "1", "Activo", AccountType.Asset, isPostable: false),
+            Node(liabilityId, "2", "Pasivo", AccountType.Liability, isPostable: false),
+        };
+        _chartOfAccountsService.GetTreeAsync(Arg.Any<CancellationToken>()).Returns(tree);
+        await _sut.InitializeAsync();
+        _sut.SelectedTypeFilter = AccountTypeFilter.Asset;
+
+        _sut.SelectedTypeFilter = AccountTypeFilter.All;
+
+        _sut.RootNodes.Should().OnlyContain(n => n.IsVisible);
+    }
+
+    [Fact]
+    public async Task TotalAccountCount_CountsEveryNodeInTheWholeTree()
+    {
+        var childId = Guid.NewGuid();
+        var rootId = Guid.NewGuid();
+        var otherRootId = Guid.NewGuid();
+        var child = Node(childId, "1.1", "Activo corriente", isPostable: true);
+        var root = Node(rootId, "1", "Activo", false, true, child);
+        var otherRoot = Node(otherRootId, "4", "Ingresos", isPostable: true);
+        _chartOfAccountsService.GetTreeAsync(Arg.Any<CancellationToken>()).Returns(new[] { root, otherRoot });
+
+        await _sut.InitializeAsync();
+
+        _sut.TotalAccountCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_LoadsTheBalanceCheck()
+    {
+        var balanceCheck = new BalanceCheckDto(1000m, 1000m);
+        _chartOfAccountsService.GetTreeAsync(Arg.Any<CancellationToken>()).Returns([]);
+        _chartOfAccountsService.GetBalanceCheckAsync(Arg.Any<CancellationToken>()).Returns(balanceCheck);
+
+        await _sut.InitializeAsync();
+
+        _sut.BalanceCheck.Should().Be(balanceCheck);
+        _sut.BalanceCheck!.IsBalanced.Should().BeTrue();
     }
 }

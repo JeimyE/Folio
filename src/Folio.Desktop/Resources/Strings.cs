@@ -33,6 +33,18 @@ public static class Strings
 
     public static string ShellToggleTheme => Get("ShellToggleTheme");
 
+    public static string ShellBrandSubtitle => Get("ShellBrandSubtitle");
+
+    public static string RoleAdministrador => Get("RoleAdministrador");
+
+    public static string RoleContador => Get("RoleContador");
+
+    public static string RoleConsulta => Get("RoleConsulta");
+
+    public static string ShellSectionGeneral => Get("ShellSectionGeneral");
+
+    public static string ShellSectionContabilidad => Get("ShellSectionContabilidad");
+
     public static string WelcomeGreetingFormat => Get("WelcomeGreetingFormat");
 
     public static string NavWelcome => Get("NavWelcome");
@@ -82,6 +94,40 @@ public static class Strings
     public static string ChartOfAccountsDeleteConfirmTitle => Get("ChartOfAccountsDeleteConfirmTitle");
 
     public static string ChartOfAccountsDeleteConfirmMessageFormat => Get("ChartOfAccountsDeleteConfirmMessageFormat");
+
+    public static string ChartOfAccountsTabAllFormat => Get("ChartOfAccountsTabAllFormat");
+
+    public static string ChartOfAccountsTabAsset => Get("ChartOfAccountsTabAsset");
+
+    public static string ChartOfAccountsTabLiability => Get("ChartOfAccountsTabLiability");
+
+    public static string ChartOfAccountsTabEquity => Get("ChartOfAccountsTabEquity");
+
+    public static string ChartOfAccountsTabRevenue => Get("ChartOfAccountsTabRevenue");
+
+    public static string ChartOfAccountsTabCostOrExpense => Get("ChartOfAccountsTabCostOrExpense");
+
+    public static string ChartOfAccountsInactiveTag => Get("ChartOfAccountsInactiveTag");
+
+    public static string ChartOfAccountsDetailHeaderFormat => Get("ChartOfAccountsDetailHeaderFormat");
+
+    public static string ChartOfAccountsDetailSummaryFormat => Get("ChartOfAccountsDetailSummaryFormat");
+
+    public static string ChartOfAccountsCuentaT => Get("ChartOfAccountsCuentaT");
+
+    public static string ChartOfAccountsDebe => Get("ChartOfAccountsDebe");
+
+    public static string ChartOfAccountsHaber => Get("ChartOfAccountsHaber");
+
+    public static string ChartOfAccountsSaldo => Get("ChartOfAccountsSaldo");
+
+    public static string ChartOfAccountsBalanceByMonth => Get("ChartOfAccountsBalanceByMonth");
+
+    public static string ChartOfAccountsLastSixMonths => Get("ChartOfAccountsLastSixMonths");
+
+    public static string ChartOfAccountsRecentEntries => Get("ChartOfAccountsRecentEntries");
+
+    public static string ChartOfAccountsBalanceCheckLabel => Get("ChartOfAccountsBalanceCheckLabel");
 
     public static string AccountFormCode => Get("AccountFormCode");
 

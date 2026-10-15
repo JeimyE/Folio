@@ -59,6 +59,24 @@
   <data name="ShellToggleTheme" xml:space="preserve">
     <value>Cambiar tema</value>
   </data>
+  <data name="ShellBrandSubtitle" xml:space="preserve">
+    <value>FOLIVORA SOFTWARE</value>
+  </data>
+  <data name="RoleAdministrador" xml:space="preserve">
+    <value>Administrador/a</value>
+  </data>
+  <data name="RoleContador" xml:space="preserve">
+    <value>Contador/a</value>
+  </data>
+  <data name="RoleConsulta" xml:space="preserve">
+    <value>Consulta</value>
+  </data>
+  <data name="ShellSectionGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="ShellSectionContabilidad" xml:space="preserve">
+    <value>Contabilidad</value>
+  </data>
   <data name="WelcomeGreetingFormat" xml:space="preserve">
     <value>Bienvenido/a, {0}</value>
   </data>
@@ -133,6 +151,57 @@
   </data>
   <data name="ChartOfAccountsDeleteConfirmMessageFormat" xml:space="preserve">
     <value>¿Está segura de que desea eliminar la cuenta {0} - {1}? Esta acción no se puede deshacer.</value>
+  </data>
+  <data name="ChartOfAccountsTabAllFormat" xml:space="preserve">
+    <value>Todas · {0}</value>
+  </data>
+  <data name="ChartOfAccountsTabAsset" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="ChartOfAccountsTabLiability" xml:space="preserve">
+    <value>Pasivo</value>
+  </data>
+  <data name="ChartOfAccountsTabEquity" xml:space="preserve">
+    <value>Patrimonio</value>
+  </data>
+  <data name="ChartOfAccountsTabRevenue" xml:space="preserve">
+    <value>Ingresos</value>
+  </data>
+  <data name="ChartOfAccountsTabCostOrExpense" xml:space="preserve">
+    <value>Costos y gastos</value>
+  </data>
+  <data name="ChartOfAccountsInactiveTag" xml:space="preserve">
+    <value>inactiva</value>
+  </data>
+  <data name="ChartOfAccountsDetailHeaderFormat" xml:space="preserve">
+    <value>Cuenta {0}</value>
+  </data>
+  <data name="ChartOfAccountsDetailSummaryFormat" xml:space="preserve">
+    <value>{0} · {1} · {2} · Naturaleza {3}</value>
+  </data>
+  <data name="ChartOfAccountsCuentaT" xml:space="preserve">
+    <value>CUENTA T</value>
+  </data>
+  <data name="ChartOfAccountsDebe" xml:space="preserve">
+    <value>Debe</value>
+  </data>
+  <data name="ChartOfAccountsHaber" xml:space="preserve">
+    <value>Haber</value>
+  </data>
+  <data name="ChartOfAccountsSaldo" xml:space="preserve">
+    <value>Saldo</value>
+  </data>
+  <data name="ChartOfAccountsBalanceByMonth" xml:space="preserve">
+    <value>SALDO POR MES</value>
+  </data>
+  <data name="ChartOfAccountsLastSixMonths" xml:space="preserve">
+    <value>últimos 6 meses</value>
+  </data>
+  <data name="ChartOfAccountsRecentEntries" xml:space="preserve">
+    <value>ÚLTIMOS ASIENTOS</value>
+  </data>
+  <data name="ChartOfAccountsBalanceCheckLabel" xml:space="preserve">
+    <value>Montos en colones (₡). Activo = Pasivo + Patrimonio</value>
   </data>
   <data name="AccountFormCode" xml:space="preserve">
     <value>Código</value>

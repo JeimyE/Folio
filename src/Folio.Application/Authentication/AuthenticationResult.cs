@@ -1,3 +1,5 @@
+using Folio.Domain.Enums;
+
 namespace Folio.Application.Authentication;
 
 public enum AuthenticationFailureReason
@@ -26,24 +28,27 @@ public sealed class AuthenticationResult
 
     public string? FullName { get; }
 
-    private AuthenticationResult(bool succeeded, AuthenticationFailureReason? failureReason, DateTime? lockedUntilUtc, Guid? userId, string? fullName)
+    public UserRole? Role { get; }
+
+    private AuthenticationResult(bool succeeded, AuthenticationFailureReason? failureReason, DateTime? lockedUntilUtc, Guid? userId, string? fullName, UserRole? role)
     {
         Succeeded = succeeded;
         FailureReason = failureReason;
         LockedUntilUtc = lockedUntilUtc;
         UserId = userId;
         FullName = fullName;
+        Role = role;
     }
 
-    public static AuthenticationResult Success(Guid userId, string fullName) =>
-        new(true, null, null, userId, fullName);
+    public static AuthenticationResult Success(Guid userId, string fullName, UserRole role) =>
+        new(true, null, null, userId, fullName, role);
 
     public static AuthenticationResult InvalidCredentials() =>
-        new(false, AuthenticationFailureReason.InvalidCredentials, null, null, null);
+        new(false, AuthenticationFailureReason.InvalidCredentials, null, null, null, null);
 
     public static AuthenticationResult AccountLocked(DateTime lockedUntilUtc) =>
-        new(false, AuthenticationFailureReason.AccountLocked, lockedUntilUtc, null, null);
+        new(false, AuthenticationFailureReason.AccountLocked, lockedUntilUtc, null, null, null);
 
     public static AuthenticationResult AccountInactive() =>
-        new(false, AuthenticationFailureReason.AccountInactive, null, null, null);
+        new(false, AuthenticationFailureReason.AccountInactive, null, null, null, null);
 }

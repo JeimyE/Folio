@@ -39,7 +39,7 @@ public sealed partial class LoginViewModel(IAuthenticationService authentication
 
             if (result.Succeeded)
             {
-                messenger.Send(new UserSignedInMessage(result.UserId!.Value, result.FullName!));
+                messenger.Send(new UserSignedInMessage(result.UserId!.Value, result.FullName!, result.Role!.Value));
             }
             else
             {

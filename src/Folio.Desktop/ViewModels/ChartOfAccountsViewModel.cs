@@ -4,17 +4,35 @@ using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Folio.Application.ChartOfAccounts;
+using Folio.Application.Company;
 using Folio.Desktop.Dialogs;
 using Folio.Desktop.Resources;
+using Folio.Domain.Enums;
 
 namespace Folio.Desktop.ViewModels;
 
 public sealed partial class ChartOfAccountsViewModel(
     IChartOfAccountsService chartOfAccountsService,
-    IDialogService dialogService) : ObservableObject
+    IDialogService dialogService,
+    ICompanyContextService companyContextService) : ObservableObject
 {
+    private const double MaxMonthlyBarHeight = 56;
+    private const double MinMonthlyBarHeight = 4;
+
     private static readonly CompositeFormat DeleteConfirmMessageFormat =
         CompositeFormat.Parse(Strings.ChartOfAccountsDeleteConfirmMessageFormat);
+
+    private static readonly CompositeFormat DetailHeaderFormat =
+        CompositeFormat.Parse(Strings.ChartOfAccountsDetailHeaderFormat);
+
+    private static readonly CompositeFormat DetailSummaryFormat =
+        CompositeFormat.Parse(Strings.ChartOfAccountsDetailSummaryFormat);
+
+    private static readonly CompositeFormat TabAllFormat =
+        CompositeFormat.Parse(Strings.ChartOfAccountsTabAllFormat);
+
+    [ObservableProperty]
+    private string _companyName = string.Empty;
 
     [ObservableProperty]
     private ObservableCollection<AccountTreeNodeViewModel> _rootNodes = [];
@@ -23,10 +41,34 @@ public sealed partial class ChartOfAccountsViewModel(
     private string _searchText = string.Empty;
 
     [ObservableProperty]
+    private AccountTypeFilter _selectedTypeFilter = AccountTypeFilter.All;
+
+    [ObservableProperty]
+    private int _totalAccountCount;
+
+    [ObservableProperty]
+    private string _tabAllLabel = string.Empty;
+
+    [ObservableProperty]
+    private BalanceCheckDto? _balanceCheck;
+
+    [ObservableProperty]
     private AccountTreeNodeViewModel? _selectedNode;
 
     [ObservableProperty]
     private AccountDetailDto? _selectedDetail;
+
+    [ObservableProperty]
+    private IReadOnlyList<MonthlyBalanceBarViewModel> _monthlyBalanceBars = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<RecentEntryRowViewModel> _recentEntryRows = [];
+
+    [ObservableProperty]
+    private string _selectedDetailHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedDetailSummary = string.Empty;
 
     [ObservableProperty]
     private string? _errorMessage;
@@ -34,7 +76,11 @@ public sealed partial class ChartOfAccountsViewModel(
     [ObservableProperty]
     private bool _isBusy;
 
-    public async Task InitializeAsync() => await LoadTreeAsync(selectId: null);
+    public async Task InitializeAsync()
+    {
+        CompanyName = await companyContextService.GetCompanyNameAsync();
+        await LoadTreeAsync(selectId: null);
+    }
 
     [RelayCommand]
     private async Task RefreshAsync() => await LoadTreeAsync(SelectedNode?.Id);
@@ -141,14 +187,20 @@ public sealed partial class ChartOfAccountsViewModel(
         {
             var tree = await chartOfAccountsService.GetTreeAsync();
             RootNodes = new ObservableCollection<AccountTreeNodeViewModel>(tree.Select(dto => new AccountTreeNodeViewModel(dto)));
+            TotalAccountCount = CountAccounts(RootNodes);
+            TabAllLabel = string.Format(CultureInfo.CurrentCulture, TabAllFormat, TotalAccountCount);
             ApplyFilter();
             SelectedNode = selectId is { } id ? FindNode(id) : null;
+            BalanceCheck = await chartOfAccountsService.GetBalanceCheckAsync();
         }
         finally
         {
             IsBusy = false;
         }
     }
+
+    private static int CountAccounts(IEnumerable<AccountTreeNodeViewModel> nodes) =>
+        nodes.Sum(node => 1 + CountAccounts(node.Children));
 
     private AccountTreeNodeViewModel? FindNode(Guid id)
     {
@@ -166,12 +218,14 @@ public sealed partial class ChartOfAccountsViewModel(
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
 
+    partial void OnSelectedTypeFilterChanged(AccountTypeFilter value) => ApplyFilter();
+
     private void ApplyFilter()
     {
         var trimmed = SearchText.Trim();
         foreach (var root in RootNodes)
         {
-            root.ApplyFilter(trimmed);
+            root.ApplyFilter(trimmed, SelectedTypeFilter);
         }
     }
 
@@ -186,4 +240,69 @@ public sealed partial class ChartOfAccountsViewModel(
 
     private async Task LoadDetailAsync(AccountTreeNodeViewModel? node) =>
         SelectedDetail = node is null ? null : await chartOfAccountsService.GetDetailAsync(node.Id);
+
+    partial void OnSelectedDetailChanged(AccountDetailDto? value)
+    {
+        MonthlyBalanceBars = BuildMonthlyBalanceBars(value);
+        RecentEntryRows = value is null
+            ? []
+            : value.RecentEntries
+                .Select(e => e.Debit > 0m
+                    ? new RecentEntryRowViewModel(e.Number, e.Description, e.Debit, "D")
+                    : new RecentEntryRowViewModel(e.Number, e.Description, e.Credit, "H"))
+                .ToList();
+        SelectedDetailHeader = value is null
+            ? string.Empty
+            : string.Format(CultureInfo.CurrentCulture, DetailHeaderFormat, value.Code);
+        SelectedDetailSummary = BuildSelectedDetailSummary(value);
+    }
+
+    private static List<MonthlyBalanceBarViewModel> BuildMonthlyBalanceBars(AccountDetailDto? detail)
+    {
+        if (detail is null || detail.MonthlyBalances.Count == 0)
+        {
+            return [];
+        }
+
+        var balances = detail.MonthlyBalances;
+        var max = balances.Max(m => m.Balance);
+        var min = Math.Min(0m, balances.Min(m => m.Balance));
+        var range = max - min;
+
+        return balances.Select((month, index) =>
+        {
+            var height = range == 0m
+                ? MaxMonthlyBarHeight
+                : MinMonthlyBarHeight + (double)((month.Balance - min) / range) * (MaxMonthlyBarHeight - MinMonthlyBarHeight);
+            var monthAbbreviation = new DateOnly(month.Year, month.Month, 1)
+                .ToDateTime(TimeOnly.MinValue)
+                .ToString("MMM", CultureInfo.CurrentCulture)
+                .TrimEnd('.'); // es-CR abbreviates with a trailing dot ("may."); the ledger design shows "may"
+            return new MonthlyBalanceBarViewModel(height, index == balances.Count - 1, monthAbbreviation);
+        }).ToList();
+    }
+
+    private static string BuildSelectedDetailSummary(AccountDetailDto? detail)
+    {
+        if (detail is null)
+        {
+            return string.Empty;
+        }
+
+        var activeText = detail.IsActive ? Strings.ChartOfAccountsStatusActive : Strings.ChartOfAccountsStatusInactive;
+        var kindText = detail.IsPostable ? Strings.ChartOfAccountsKindPostable : Strings.ChartOfAccountsKindGroup;
+        var typeText = detail.Type switch
+        {
+            AccountType.Asset => Strings.AccountTypeAsset,
+            AccountType.Liability => Strings.AccountTypeLiability,
+            AccountType.Equity => Strings.AccountTypeEquity,
+            AccountType.Revenue => Strings.AccountTypeRevenue,
+            AccountType.Cost => Strings.AccountTypeCost,
+            AccountType.Expense => Strings.AccountTypeExpense,
+            _ => string.Empty,
+        };
+        var natureText = detail.NormalBalance == NormalBalance.Debit ? Strings.NormalBalanceDebit : Strings.NormalBalanceCredit;
+
+        return string.Format(CultureInfo.CurrentCulture, DetailSummaryFormat, activeText, kindText, typeText, natureText);
+    }
 }
